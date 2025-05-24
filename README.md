@@ -77,7 +77,7 @@ docker-compose down
 
 ## 👨‍💻 Autor
 
-- [Tu Nombre o Usuario de GitHub]
+- El Lide de desarrollo Christian Vivanco
 
 ---
 
