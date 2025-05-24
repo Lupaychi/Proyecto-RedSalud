@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
@@ -9,15 +10,15 @@ app.use(express.json());
 
 // Database connection
 const connection = mysql.createConnection({
-  host: '127.0.0.1',
-  port: 3306,          // Your MySQL port from the screenshot
-  user: 'root',
-  password: 'MySQL1234', // Add your actual password
-  database: 'personas_db'  // We'll create this if it doesn't exist
+  host: process.env.DB_HOST,
+  port: 3306,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE
 });
 
 // Connect to MySQL without specifying database first
-connection.query('CREATE DATABASE IF NOT EXISTS `db-personas`', (err) => {
+connection.query('CREATE DATABASE IF NOT EXISTS `personas_db`', (err) => {
   if (err) {
     console.error('Error creating database:', err);
     return;
@@ -26,7 +27,7 @@ connection.query('CREATE DATABASE IF NOT EXISTS `db-personas`', (err) => {
   console.log('Database checked/created successfully');
   
   // Now use the database
-  connection.query('USE `db-personas`', (err) => {
+  connection.query('USE `personas_db`', (err) => {
     if (err) {
       console.error('Error selecting database:', err);
       return;
@@ -177,6 +178,8 @@ app.delete('/api/personas/:id', (req, res) => {
 
 // Start server
 const PORT = 3001; // Changed from 3000 to avoid TIME_WAIT issues
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Servidor corriendo en http://0.0.0.0:${PORT}`);
 });
+
+
