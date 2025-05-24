@@ -3,6 +3,7 @@
 Este proyecto es una aplicación fullstack (Angular + Node.js + MySQL) para la gestión de personas, completamente dockerizada.  
 **No necesitas instalar Node, Angular ni MySQL en tu máquina. Solo Docker y Docker Compose.**
 
+
 ---
 
 ## 🚀 ¿Cómo ejecutar el proyecto?
@@ -30,9 +31,7 @@ Este proyecto es una aplicación fullstack (Angular + Node.js + MySQL) para la g
    - Frontend Angular (puerto 4200)
 
 4. **Accede a la aplicación:**
-   - Frontend: [http://localhost:4200](http://localhost:4200)
-   - Backend/API: [http://localhost:3001/api/personas](http://localhost:3001/api/personas)
-   - MySQL: puerto `3307` (opcional, para clientes externos)
+   - Pagina: [http://127.0.0.1:4200/]
 
 ---
 
