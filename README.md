@@ -11,7 +11,7 @@ Este proyecto es una aplicación fullstack (Angular + Node.js + MySQL) para la g
 1. **Clona este repositorio:**
 
    ```sh
-   git clone <URL_DEL_REPO>
+   git clone https://github.com/Lupaychi/Visualizador-db
    cd VisualizadorPersonas
    ```
 
