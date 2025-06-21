@@ -4,51 +4,14 @@ import { CommonModule } from '@angular/common';
 import { JsonPipe } from '@angular/common';
 import { PersonasComponent } from './personas/personas.component';
 import { HttpClientModule } from '@angular/common/http';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, PersonasComponent, HttpClientModule],
-  template: `
-    <div class="container">
-      <header>
-        <h1>Sistema de Gestión de Personas</h1>
-      </header>
-      
-      <main>
-        <app-personas></app-personas>
-      </main>
-      
-      <footer>
-        <p>© 2025 - Taller de Interfaces</p>
-      </footer>
-    </div>
-  `,
-  styles: [`
-    .container {
-      font-family: Arial, sans-serif;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    
-    header {
-      background-color: #4CAF50;
-      color: white;
-      padding: 15px;
-      border-radius: 5px;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-    
-    footer {
-      margin-top: 40px;
-      padding-top: 20px;
-      border-top: 1px solid #ddd;
-      text-align: center;
-      color: #666;
-    }
-  `]
+  imports: [CommonModule, PersonasComponent, HttpClientModule, RouterModule],
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
   responseData: any;

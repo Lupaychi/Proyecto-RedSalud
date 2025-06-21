@@ -1,0 +1,120 @@
+<div class="box-container">
+  <div class="card">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0"><i class="bi bi-plus-square me-2"></i>CREAR BOX</h4>
+    </div>
+    
+    <div class="card-body">
+      <div *ngIf="loading" class="text-center my-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-2">Procesando...</p>
+      </div>
+      
+      <div *ngIf="mensaje" class="alert alert-{{tipoMensaje}} alert-dismissible fade show" role="alert">
+        <i class="bi" [ngClass]="{
+          'bi-check-circle-fill': tipoMensaje === 'success',
+          'bi-exclamation-triangle-fill': tipoMensaje === 'warning',
+          'bi-x-circle-fill': tipoMensaje === 'danger'
+        }"></i> {{ mensaje }}
+        <button type="button" class="btn-close" (click)="mensaje = ''" aria-label="Close"></button>
+      </div>
+      
+      <div class="row">
+        <div class="col-md-6">
+          <form [formGroup]="boxForm" (ngSubmit)="crearBox()">
+            <div class="mb-3">
+              <label for="piso" class="form-label">Piso</label>
+              <select id="piso" formControlName="piso" class="form-select" [class.is-invalid]="boxForm.get('piso')?.invalid && boxForm.get('piso')?.touched">
+                <option value="" disabled selected>Seleccione un piso</option>
+                <option *ngFor="let piso of pisos" [value]="piso">{{ piso }}</option>
+              </select>
+              <div *ngIf="boxForm.get('piso')?.invalid && boxForm.get('piso')?.touched" class="invalid-feedback">
+                Este campo es obligatorio
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="numero" class="form-label">Número de Box</label>
+              <input type="text" id="numero" formControlName="numero" class="form-control" [class.is-invalid]="boxForm.get('numero')?.invalid && boxForm.get('numero')?.touched" placeholder="Ej: 101">
+              <div *ngIf="boxForm.get('numero')?.invalid && boxForm.get('numero')?.touched" class="invalid-feedback">
+                Debe ingresar un número de box válido de tres dígitos
+              </div>
+              <small class="text-muted">Ingrese un número de tres dígitos. El primer dígito generalmente corresponde al piso.</small>
+            </div>
+            
+            <div class="mb-3">
+              <label for="tipo" class="form-label">Tipo de Box</label>
+              <select id="tipo" formControlName="tipo" class="form-select" [class.is-invalid]="boxForm.get('tipo')?.invalid && boxForm.get('tipo')?.touched">
+                <option *ngFor="let tipo of tiposBox" [value]="tipo">{{ tipo }}</option>
+              </select>
+              <div *ngIf="boxForm.get('tipo')?.invalid && boxForm.get('tipo')?.touched" class="invalid-feedback">
+                Este campo es obligatorio
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="especialidad" class="form-label">Especialidad principal (opcional)</label>
+              <select id="especialidad" formControlName="especialidad" class="form-select">
+                <option value="">Sin especialidad específica</option>
+                <option *ngFor="let esp of especialidades" [value]="esp">{{ esp }}</option>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label for="descripcion" class="form-label">Descripción (opcional)</label>
+              <textarea id="descripcion" formControlName="descripcion" class="form-control" rows="3" placeholder="Ingrese una descripción para este box"></textarea>
+            </div>
+            
+            <div class="d-grid gap-2 mt-4">
+              <button type="submit" class="btn btn-success" [disabled]="boxForm.invalid">
+                <i class="bi bi-save me-2"></i> Crear Box
+              </button>
+              <button type="button" class="btn btn-secondary" (click)="boxForm.reset({tipo: 'Consulta'})">
+                <i class="bi bi-x-circle me-2"></i> Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+        
+        <div class="col-md-6">
+          <div class="ultimos-boxes">
+            <h5 class="text-primary mb-3"><i class="bi bi-list-ul me-2"></i>Últimos Boxes Registrados</h5>
+            
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th>Piso</th>
+                    <th>Número</th>
+                    <th>Tipo de Box</th>
+                    <th>Especialidad</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let box of ultimosBoxesRegistrados">
+                    <td>{{ box.piso }}</td>
+                    <td>{{ box.numero }}</td>
+                    <td>
+                      <span class="badge rounded-pill" [ngClass]="{
+                        'text-bg-success': box.tipo === 'Consulta',
+                        'text-bg-warning': box.tipo === 'Procedimiento'
+                      }">
+                        {{ box.tipo }}
+                      </span>
+                    </td>
+                    <td>{{ box.especialidad || 'No especificada' }}</td>
+                  </tr>
+                  <tr *ngIf="ultimosBoxesRegistrados.length === 0">
+                    <td colspan="4" class="text-center py-3">No hay boxes registrados</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

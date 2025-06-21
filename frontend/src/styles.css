@@ -1,1 +1,46 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Paleta de colores RedSalud */
+:root {
+  --primary: #0073b7;
+  --primary-dark: #005a8e;
+  --primary-light: #e6f3fa;
+  --accent: #ff8c00;
+  --success: #28a745;
+  --danger: #dc3545;
+  --warning: #ffc107;
+  --info: #17a2b8;
+  --text-dark: #333333;
+  --text-gray: #6c757d;
+  --light-gray: #f8f9fa;
+  --border-color: #dee2e6;
+  --white: #ffffff;
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+body {
+  font-family: 'Nunito', 'Segoe UI', Roboto, Arial, sans-serif;
+  background-color: #f5f8fa;
+  color: var(--text-dark);
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+.btn-success {
+  background-color: var(--success);
+  border-color: var(--success);
+}
+
+.bg-primary {
+  background-color: var(--primary) !important;
+}
+
+/* Añadir tipografía Google Font (necesita el link en index.html) */

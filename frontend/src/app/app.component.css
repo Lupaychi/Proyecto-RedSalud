@@ -1,0 +1,52 @@
+.redsalud-header {
+  background-color: var(--primary);
+  padding: 10px 0;
+}
+
+.redsalud-header .navbar-brand {
+  color: white;
+  font-weight: bold;
+}
+
+.redsalud-header .nav-link {
+  color: white;
+  padding: 0.5rem 1rem;
+}
+
+.redsalud-header .nav-link:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.sidebar-box {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+}
+
+.sidebar-title {
+  color: var(--primary-dark);
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.redsalud-footer {
+  background-color: var(--primary-dark);
+  color: white;
+  padding: 40px 0 20px;
+}
+
+.redsalud-footer a {
+  color: white;
+  text-decoration: none;
+}
+
+.redsalud-footer a:hover {
+  text-decoration: underline;
+}
+
+.redsalud-footer h5 {
+  font-weight: bold;
+  margin-bottom: 15px;
+}

@@ -1,39 +1,133 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
+import { map, catchError, tap } from 'rxjs/operators';
 
-export interface Persona {
-  id?: number;
+export interface Doctor {
+  rut: string;
   nombre: string;
-  edad?: number;
+  especialidad: string;
+  correo: string;
+  telefono: string;
+  estado?: string;
+  horarios: {
+    dia: string;
+    horaInicio: string;
+    horaFin: string;
+    box: string;
+  }[];
+}
+
+// Añadir interfaz para estadísticas
+export interface EstadisticaEspecialidad {
+  nombre: string;
+  cantidad: number;
+  porcentaje: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class PersonasService {
-  // Make sure this URL matches your backend
-  private apiUrl = 'http://localhost:3001/api/personas';
+  private apiUrl = 'http://localhost:3001/api'; // Ajusta según tu configuración
+  private doctores: Doctor[] = [];
+  private especialidades: string[] = [];
+  private boxes: string[] = [];
 
   constructor(private http: HttpClient) { }
-  
-  getPersonas(): Observable<Persona[]> {
-    return this.http.get<Persona[]>(this.apiUrl);
+
+  obtenerDoctores(): Observable<Doctor[]> {
+    return this.http.get<{doctores: Doctor[]}>(`${this.apiUrl}/doctores`).pipe(
+      map(response => response.doctores),
+      tap(doctores => {
+        this.doctores = doctores;
+        console.log(`Obtenidos ${doctores.length} doctores del backend`);
+      }),
+      catchError(error => {
+        console.error('Error al obtener doctores:', error);
+        return of([]);
+      })
+    );
   }
   
-  getPersona(id: number): Observable<Persona> {
-    return this.http.get<Persona>(`${this.apiUrl}/${id}`);
+  buscarDoctores(filtros: {
+    busqueda?: string;
+    especialidad?: string;
+    dia?: string;
+    box?: string;
+  }): Observable<Doctor[]> {
+    // Construir parámetros de consulta
+    let params = new HttpParams();
+    if (filtros.busqueda) params = params.set('busqueda', filtros.busqueda);
+    if (filtros.especialidad) params = params.set('especialidad', filtros.especialidad);
+    if (filtros.dia) params = params.set('dia', filtros.dia);
+    if (filtros.box) params = params.set('box', filtros.box);
+    
+    // Imprimir para depuración
+    console.log('Enviando filtros al backend:', filtros);
+    
+    return this.http.get<{doctores: Doctor[]}>(`${this.apiUrl}/doctores/buscar`, { params }).pipe(
+      map(response => response.doctores),
+      tap(doctores => console.log(`Encontrados ${doctores.length} doctores con los filtros aplicados`)),
+      catchError(error => {
+        console.error('Error al buscar doctores:', error);
+        return of([]);
+      })
+    );
   }
   
-  createPersona(persona: Persona): Observable<Persona> {
-    return this.http.post<Persona>(this.apiUrl, persona);
+  obtenerEspecialidades(): Observable<string[]> {
+    if (this.especialidades.length > 0) {
+      return of(this.especialidades);
+    }
+    
+    return this.http.get<{especialidades: string[]}>(`${this.apiUrl}/doctores/especialidades`).pipe(
+      map(response => response.especialidades),
+      tap(especialidades => {
+        this.especialidades = especialidades;
+      }),
+      catchError(error => {
+        console.error('Error al obtener especialidades:', error);
+        return of([]);
+      })
+    );
   }
   
-  updatePersona(persona: Persona): Observable<Persona> {
-    return this.http.put<Persona>(`${this.apiUrl}/${persona.id}`, persona);
+  obtenerBoxes(): Observable<string[]> {
+    if (this.boxes.length > 0) {
+      return of(this.boxes);
+    }
+    
+    return this.http.get<{boxes: string[]}>(`${this.apiUrl}/doctores/boxes`).pipe(
+      map(response => response.boxes),
+      tap(boxes => {
+        this.boxes = boxes;
+      }),
+      catchError(error => {
+        console.error('Error al obtener boxes:', error);
+        return of([]);
+      })
+    );
   }
   
-  deletePersona(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
+  obtenerDoctorPorRut(rut: string): Observable<Doctor | undefined> {
+    return this.http.get<{doctores: Doctor[]}>(`${this.apiUrl}/doctores/buscar?busqueda=${rut}`).pipe(
+      map(response => response.doctores.find(doc => doc.rut === rut)),
+      catchError(error => {
+        console.error('Error al obtener doctor por RUT:', error);
+        return of(undefined);
+      })
+    );
+  }
+
+  // Añadir método al servicio PersonasService
+  obtenerEstadisticasEspecialidades(): Observable<EstadisticaEspecialidad[]> {
+    return this.http.get<{estadisticas: EstadisticaEspecialidad[]}>(`${this.apiUrl}/doctores/estadisticas-especialidades`).pipe(
+      map(response => response.estadisticas),
+      catchError(error => {
+        console.error('Error al obtener estadísticas de especialidades:', error);
+        return of([]);
+      })
+    );
   }
 }

@@ -1,18 +1,20 @@
-version: '3.8'
-
 services:
   mysql:
     image: mysql:8.0
-    container_name: mysql-personas
+    container_name: redsalud-testing-mysql
     environment:
       MYSQL_ROOT_PASSWORD: MySQL1234
       MYSQL_DATABASE: personas_db
     ports:
       - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - redsalud-network
 
   backend:
     build: ./backend
-    container_name: backend-personas
+    container_name: redsalud-testing-backend
     restart: always
     environment:
       DB_HOST: mysql
@@ -23,15 +25,26 @@ services:
       - "3001:3001" # backend
     depends_on:
       - mysql
+    volumes:
+      - ./backend/data:/app/data
+    networks:
+      - redsalud-network
 
   frontend:
     build: ./frontend
-    container_name: frontend-personas
+    container_name: redsalud-testing-frontend
     restart: always
     ports:
       - "4200:4200"
     depends_on:
       - backend
+    networks:
+      - redsalud-network
+
+networks:
+  redsalud-network:
+    name: redsalud-testing-network
 
 volumes:
   mysql_data:
+    name: redsalud-testing-mysql-data

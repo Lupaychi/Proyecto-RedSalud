@@ -1,0 +1,228 @@
+<div class="redsalud-module animate__animated animate__fadeIn">
+  <div class="module-header">
+    <h2><i class="bi bi-people-fill me-2"></i>Directorio Médico</h2>
+    <p class="text-muted">Encuentra al especialista que necesitas en nuestra red de profesionales</p>
+  </div>
+  
+  <div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0"><i class="bi bi-search me-2"></i> Búsqueda de Especialistas</h5>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-3 mb-3">
+          <label for="busqueda" class="form-label">Buscar por nombre o RUT:</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="text" id="busqueda" class="form-control" [(ngModel)]="busqueda" placeholder="Buscar doctor...">
+          </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+          <label for="especialidad" class="form-label">Especialidad:</label>
+          <select id="especialidad" class="form-select" [(ngModel)]="filtroEspecialidad">
+            <option value="">Todas las especialidades</option>
+            <optgroup *ngFor="let grupo of especialidadesAgrupadas" [label]="grupo.letra">
+              <option *ngFor="let especialidad of grupo.items" [value]="especialidad.nombre">
+                {{especialidad.nombre}} ({{especialidad.cantidad}})
+              </option>
+            </optgroup>
+          </select>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+          <label for="dia" class="form-label">Día disponible:</label>
+          <select id="dia" class="form-select" [(ngModel)]="filtroDia">
+            <option value="">Todos los días</option>
+            <option value="lunes">Lunes</option>
+            <option value="martes">Martes</option>
+            <option value="miercoles">Miércoles</option>
+            <option value="jueves">Jueves</option>
+            <option value="viernes">Viernes</option>
+            <option value="sabado">Sábado</option>
+          </select>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+          <label for="box" class="form-label">Box:</label>
+          <select id="box" class="form-select" [(ngModel)]="filtroBox">
+            <option value="">Todos los boxes</option>
+            <option *ngFor="let box of boxes" [value]="box">Box {{box}}</option>
+          </select>
+        </div>
+        
+        <div class="col-md-12 mt-3">
+          <button class="btn btn-primary me-2" (click)="aplicarFiltros()">
+            <i class="bi bi-search me-1"></i> Buscar
+          </button>
+          <button class="btn btn-outline-secondary" (click)="limpiarFiltros()">
+            <i class="bi bi-x-circle me-1"></i> Limpiar filtros
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Estadísticas de especialidades (con estilos mejorados) -->
+  <div class="row mb-4" *ngIf="estadisticasEspecialidades.length > 0 && !cargando">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-bar-chart-fill me-2"></i> Especialidades Médicas</h5>
+          <span class="badge bg-light text-dark">{{estadisticasEspecialidades.length}} especialidades</span>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <h6 class="text-primary mb-3"><i class="bi bi-trophy me-2"></i>Top 5 Especialidades</h6>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Especialidad</th>
+                      <th class="text-center">Doctores</th>
+                      <th class="text-center">%</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let esp of estadisticasEspecialidades.slice(0, 5)">
+                      <td>{{ esp.nombre }}</td>
+                      <td class="text-center"><span class="badge bg-primary">{{ esp.cantidad }}</span></td>
+                      <td class="text-center">{{ esp.porcentaje }}%</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <h6 class="text-primary mb-3"><i class="bi bi-graph-up me-2"></i>Distribución</h6>
+              <div *ngFor="let esp of estadisticasEspecialidades.slice(0, 5)" class="mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                  <span>{{ esp.nombre }}</span>
+                  <span>{{ esp.cantidad }} ({{ esp.porcentaje }}%)</span>
+                </div>
+                <div class="progress" style="height: 10px;">
+                  <div class="progress-bar bg-primary" [style.width.%]="esp.porcentaje"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Mensaje de carga mejorado -->
+  <div *ngIf="cargando" class="text-center my-5 py-5 animate__animated animate__pulse animate__infinite">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-3 text-primary fw-bold">Cargando información de profesionales médicos...</p>
+  </div>
+  
+  <!-- Resultados -->
+  <div *ngIf="!cargando && !error" class="animate__animated animate__fadeIn">
+    <!-- Info sobre resultados -->
+    <div class="alert" [ngClass]="{
+      'alert-info': doctoresFiltrados.length === 0,
+      'alert-success': doctoresFiltrados.length > 0
+    }">
+      <div class="d-flex align-items-center">
+        <i class="bi" [ngClass]="{
+          'bi-info-circle-fill': doctoresFiltrados.length === 0,
+          'bi-check-circle-fill': doctoresFiltrados.length > 0
+        }" style="font-size: 1.5rem; margin-right: 10px;"></i>
+        <div>
+          <h5 class="mb-1">{{ doctoresFiltrados.length === 0 ? 'Sin resultados' : 'Profesionales encontrados' }}</h5>
+          <p class="mb-0">{{ doctoresFiltrados.length === 0 ? 
+            'No se encontraron doctores con los criterios de búsqueda especificados.' : 
+            'Se encontraron ' + doctoresFiltrados.length + ' profesionales que coinciden con tu búsqueda.' }}</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Lista de doctores -->
+    <div class="row row-cols-1 row-cols-md-2 g-4" *ngIf="doctoresFiltrados.length > 0">
+      <div class="col" *ngFor="let doctor of doctoresFiltrados">
+        <div class="card h-100 doctor-card" [ngClass]="{'border-warning': doctor.estado === 'Sin agenda'}">
+          <div class="card-header doctor-card-header" [ngClass]="{'bg-warning': doctor.estado === 'Sin agenda', 'bg-primary text-white': doctor.estado !== 'Sin agenda'}">
+            <div class="d-flex align-items-center">
+              <div class="doctor-avatar">
+                <i class="bi bi-person-circle"></i>
+              </div>
+              <div class="ms-3">
+                <h5 class="card-title mb-0">{{ doctor.nombre }}</h5>
+                <p class="mb-0 small" [class.text-white]="doctor.estado !== 'Sin agenda'">
+                  <i class="bi bi-tag-fill me-1"></i>{{ doctor.especialidad }}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <p><i class="bi bi-person-badge me-2"></i><strong>RUT:</strong> {{ doctor.rut }}</p>
+                <p *ngIf="doctor.estado">
+                  <i class="bi bi-circle-fill me-2" [ngClass]="{
+                    'text-warning': doctor.estado === 'Sin agenda',
+                    'text-success': doctor.estado !== 'Sin agenda'
+                  }"></i>
+                  <strong>Estado:</strong> 
+                  <span class="badge" [ngClass]="{
+                    'bg-warning text-dark': doctor.estado === 'Sin agenda', 
+                    'bg-success': doctor.estado !== 'Sin agenda'
+                  }">
+                    {{ doctor.estado }}
+                  </span>
+                </p>
+                <p><strong><i class="bi bi-chat-dots-fill me-2"></i>Contacto:</strong></p>
+                <ul class="list-unstyled ps-3">
+                  <li class="mb-2"><i class="bi bi-envelope-fill me-2 text-primary"></i>{{ doctor.correo }}</li>
+                  <li><i class="bi bi-telephone-fill me-2 text-primary"></i>{{ doctor.telefono }}</li>
+                </ul>
+              </div>
+              <div class="col-md-6">
+                <h6 class="text-primary"><i class="bi bi-calendar2-week-fill me-2"></i>Horarios de atención:</h6>
+                <div *ngIf="doctor.horarios.length === 0" class="text-muted fst-italic py-2">
+                  <i class="bi bi-exclamation-circle me-2"></i>No hay horarios disponibles
+                </div>
+                <div class="table-responsive" *ngIf="doctor.horarios.length > 0">
+                  <table class="table table-sm table-bordered table-hover">
+                    <thead>
+                      <tr>
+                        <th>Día</th>
+                        <th>Horario</th>
+                        <th>Box</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let horario of doctor.horarios">
+                        <td class="text-capitalize">
+                          <i class="bi bi-calendar-day me-1"></i>{{ horario.dia }}
+                        </td>
+                        <td>
+                          <i class="bi bi-clock me-1"></i>{{ horario.horaInicio }} - {{ horario.horaFin }}
+                        </td>
+                        <td class="text-center">
+                          <span class="badge bg-info text-dark">{{ horario.box }}</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="mt-3 text-end">
+              <button class="btn btn-sm btn-outline-primary me-2">
+                <i class="bi bi-person-lines-fill me-1"></i> Ver perfil
+              </button>
+              <button class="btn btn-sm btn-success">
+                <i class="bi bi-calendar-plus me-1"></i> Reservar hora
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

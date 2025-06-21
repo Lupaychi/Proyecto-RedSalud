@@ -1,13 +1,94 @@
-<div class="app-container">
-  <header>
-    <h1>Mi Aplicación Full Stack</h1>
+<div class="redsalud-container">
+  <!-- Header actualizado -->
+  <header class="redsalud-header">
+    <nav class="navbar navbar-expand-lg">
+      <div class="container">
+        <a class="navbar-brand" href="#">
+          <img src="assets/images/logo-redsalud.png" alt="RedSalud" height="40">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarMain">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <div class="dropdown me-2">
+              <button class="btn btn-primary dropdown-toggle" type="button" id="crearAsignacionDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                Crear Asignación
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="crearAsignacionDropdown">
+                <li><a class="dropdown-item" routerLink="/crear-asignacion">Nueva asignación</a></li>
+                <li><a class="dropdown-item" routerLink="/crear-box">Crear Box</a></li>
+              </ul>
+            </div>
+            
+            <div class="dropdown me-2">
+              <button class="btn btn-primary dropdown-toggle" type="button" id="modificarAsignacionesDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                Modificar Asignaciones
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="modificarAsignacionesDropdown">
+                <li><a class="dropdown-item" routerLink="/lista-asignaciones">Listar asignaciones</a></li>
+                <li><a class="dropdown-item" routerLink="/modificar-asignacion">Modificar asignación</a></li>
+              </ul>
+            </div>
+            
+            <div class="dropdown">
+              <button class="btn btn-primary dropdown-toggle" type="button" id="informesDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                Informes
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="informesDropdown">
+                <li><a class="dropdown-item" routerLink="/informe-boxes">Boxes por piso</a></li>
+                <li><a class="dropdown-item" routerLink="/informe-doctores">Doctores por especialidad</a></li>
+                <li><a class="dropdown-item" routerLink="/informe-ocupacion">Ocupación de boxes</a></li>
+              </ul>
+            </div>
+          </ul>
+          <div class="d-flex">
+            <div class="input-group">
+              <input type="search" class="form-control" placeholder="Buscar" aria-label="Buscar">
+              <button class="btn btn-light" type="button">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
   </header>
-  
-  <main>
-    <app-mensaje></app-mensaje>
+
+  <!-- Main Content -->
+  <main class="container-fluid mt-4 px-4">
+    <router-outlet></router-outlet>
   </main>
-  
-  <footer>
-    <p>Taller de Interfaces - 2025</p>
+
+  <!-- Footer -->
+  <footer class="redsalud-footer mt-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4">
+          <h5>RedSalud</h5>
+          <p>Red de salud integral para toda la familia</p>
+        </div>
+        <div class="col-md-4">
+          <h5>Enlaces rápidos</h5>
+          <ul class="list-unstyled">
+            <li><a href="#">Reservar hora</a></li>
+            <li><a href="#">Especialidades</a></li>
+            <li><a href="#">Clínicas</a></li>
+          </ul>
+        </div>
+        <div class="col-md-4">
+          <h5>Contacto</h5>
+          <ul class="list-unstyled">
+            <li>Teléfono: 600 500 9000</li>
+            <li>Email: contacto@redsalud.cl</li>
+          </ul>
+        </div>
+      </div>
+      <div class="row mt-3">
+        <div class="col-12 text-center">
+          <p>© 2025 RedSalud - Todos los derechos reservados</p>
+        </div>
+      </div>
+    </div>
   </footer>
 </div>

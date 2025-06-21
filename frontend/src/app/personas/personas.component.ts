@@ -1,281 +1,139 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Persona, PersonasService } from '../services/personas.service';
+import { PersonasService, Doctor, EstadisticaEspecialidad } from '../services/personas.service';
+
+// Añadir esta interfaz
+interface EspecialidadAgrupada {
+  letra: string;
+  items: EstadisticaEspecialidad[];
+}
 
 @Component({
   selector: 'app-personas',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  template: `
-    <div class="container">
-      <h1>Gestión de Personas</h1>
-      
-      <!-- Form for adding/editing personas -->
-      <div class="form-container">
-        <h2>{{ editingPersona ? 'Editar Persona' : 'Agregar Nueva Persona' }}</h2>
-        <form (ngSubmit)="savePersona()">
-          <div class="form-group">
-            <label for="nombre">Nombre:</label>
-            <input 
-              type="text" 
-              id="nombre" 
-              name="nombre" 
-              [(ngModel)]="currentPersona.nombre" 
-              required
-            >
-          </div>
-          
-          <div class="form-group">
-            <label for="edad">Edad:</label>
-            <input 
-              type="number" 
-              id="edad" 
-              name="edad" 
-              [(ngModel)]="currentPersona.edad"
-            >
-          </div>
-          
-          <div class="button-group">
-            <button type="submit" class="btn-primary">
-              {{ editingPersona ? 'Actualizar' : 'Agregar' }}
-            </button>
-            <button type="button" class="btn-secondary" *ngIf="editingPersona" (click)="cancelEdit()">
-              Cancelar
-            </button>
-          </div>
-        </form>
-      </div>
-      
-      <!-- Display loading indicator -->
-      <div *ngIf="loading" class="loading">
-        <p>Cargando...</p>
-      </div>
-      
-      <!-- Display error message if any -->
-      <div *ngIf="error" class="error">
-        <p>{{ error }}</p>
-        <button (click)="loadPersonas()">Reintentar</button>
-      </div>
-      
-      <!-- Table of personas -->
-      <div class="table-container" *ngIf="!loading && !error">
-        <h2>Lista de Personas</h2>
-        
-        <p *ngIf="personas.length === 0">No hay personas registradas.</p>
-        
-        <table *ngIf="personas.length > 0">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Edad</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let persona of personas">
-              <td>{{ persona.id }}</td>
-              <td>{{ persona.nombre }}</td>
-              <td>{{ persona.edad || '-' }}</td>
-              <td>
-                <button class="btn-edit" (click)="editPersona(persona)">Editar</button>
-                <button class="btn-delete" (click)="deletePersona(persona.id)">Eliminar</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-      font-family: Arial, sans-serif;
-    }
-    
-    .form-container {
-      background-color: #f5f5f5;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    .form-group {
-      margin-bottom: 15px;
-    }
-    
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-    
-    input {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-    
-    .button-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    
-    button {
-      padding: 8px 15px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    
-    .btn-primary {
-      background-color: #4CAF50;
-      color: white;
-    }
-    
-    .btn-secondary, .btn-edit {
-      background-color: #2196F3;
-      color: white;
-    }
-    
-    .btn-delete {
-      background-color: #f44336;
-      color: white;
-    }
-    
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    
-    th, td {
-      padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
-    }
-    
-    th {
-      background-color: #f2f2f2;
-      font-weight: bold;
-    }
-    
-    .loading {
-      text-align: center;
-      margin: 20px 0;
-      color: #666;
-    }
-    
-    .error {
-      color: #f44336;
-      background-color: #ffebee;
-      padding: 15px;
-      border-radius: 4px;
-      margin-bottom: 20px;
-    }
-  `]
+  templateUrl: './personas.component.html',
+  styleUrls: ['./personas.component.css']
 })
 export class PersonasComponent implements OnInit {
-  personas: Persona[] = [];
-  currentPersona: Persona = { nombre: '', edad: undefined };
-  editingPersona: boolean = false;
-  loading: boolean = false;
-  error: string | null = null;
-  
+  doctores: Doctor[] = [];
+  doctoresFiltrados: Doctor[] = [];
+  filtroEspecialidad: string = '';
+  filtroDia: string = '';
+  filtroBox: string = '';
+  busqueda: string = '';
+  especialidades: string[] = [];
+  boxes: string[] = [];
+  cargando: boolean = true;
+  error: string = '';
+  estadisticasEspecialidades: EstadisticaEspecialidad[] = [];
+  especialidadesAgrupadas: EspecialidadAgrupada[] = [];
+
   constructor(private personasService: PersonasService) { }
-  
+
   ngOnInit(): void {
-    this.loadPersonas();
+    this.cargarDatos();
   }
-  
-  loadPersonas(): void {
-    this.loading = true;
-    this.error = null;
+
+  cargarDatos(): void {
+    this.cargando = true;
+    this.error = '';
     
-    this.personasService.getPersonas().subscribe({
-      next: (data) => {
-        this.personas = data;
-        this.loading = false;
+    // Cargar doctores
+    this.personasService.obtenerDoctores().subscribe({
+      next: (doctores) => {
+        this.doctores = doctores;
+        this.doctoresFiltrados = doctores;
+        this.cargando = false;
+        console.log(`Doctores cargados: ${doctores.length}`);
       },
       error: (err) => {
-        this.error = 'Error al cargar personas: ' + (err.message || 'Error desconocido');
-        this.loading = false;
-        console.error('Error loading personas:', err);
+        this.error = 'Error al cargar doctores: ' + err.message;
+        this.cargando = false;
+        console.error('Error al cargar doctores:', err);
+      }
+    });
+    
+    // Cargar estadísticas de especialidades
+    this.personasService.obtenerEstadisticasEspecialidades().subscribe({
+      next: (estadisticas) => {
+        this.estadisticasEspecialidades = estadisticas;
+        this.agruparEspecialidades();
+      }
+    });
+    
+    // Cargar boxes
+    this.personasService.obtenerBoxes().subscribe({
+      next: (boxes) => {
+        this.boxes = boxes;
       }
     });
   }
   
-  savePersona(): void {
-    if (!this.currentPersona.nombre.trim()) {
-      alert('El nombre es obligatorio');
-      return;
-    }
+  // Método para agrupar especialidades por letra
+  agruparEspecialidades(): void {
+    // Creamos un mapa para agrupar por la primera letra
+    const grupos: {[key: string]: EstadisticaEspecialidad[]} = {};
     
-    this.loading = true;
-    
-    if (this.editingPersona && this.currentPersona.id) {
-      // Update existing persona
-      this.personasService.updatePersona(this.currentPersona).subscribe({
-        next: () => {
-          this.loadPersonas();
-          this.resetForm();
-        },
-        error: (err) => {
-          this.error = 'Error al actualizar persona: ' + (err.message || 'Error desconocido');
-          this.loading = false;
-        }
-      });
-    } else {
-      // Create new persona
-      this.personasService.createPersona(this.currentPersona).subscribe({
-        next: () => {
-          this.loadPersonas();
-          this.resetForm();
-        },
-        error: (err) => {
-          this.error = 'Error al crear persona: ' + (err.message || 'Error desconocido');
-          this.loading = false;
-        }
-      });
-    }
-  }
-  
-  editPersona(persona: Persona): void {
-    this.editingPersona = true;
-    // Clone the object to avoid direct modification
-    this.currentPersona = { ...persona };
-  }
-  
-  cancelEdit(): void {
-    this.resetForm();
-  }
-  
-  deletePersona(id?: number): void {
-    if (!id) return;
-    
-    if (confirm('¿Está seguro de que desea eliminar esta persona?')) {
-      this.loading = true;
+    this.estadisticasEspecialidades.forEach(especialidad => {
+      const primeraLetra = especialidad.nombre.charAt(0).toUpperCase();
       
-      this.personasService.deletePersona(id).subscribe({
-        next: () => {
-          this.loadPersonas();
-        },
-        error: (err) => {
-          this.error = 'Error al eliminar persona: ' + (err.message || 'Error desconocido');
-          this.loading = false;
-        }
-      });
-    }
+      if (!grupos[primeraLetra]) {
+        grupos[primeraLetra] = [];
+      }
+      
+      grupos[primeraLetra].push(especialidad);
+    });
+    
+    // Convertimos el mapa a un array y ordenamos alfabéticamente
+    this.especialidadesAgrupadas = Object.entries(grupos)
+      .map(([letra, items]) => ({ letra, items }))
+      .sort((a, b) => a.letra.localeCompare(b.letra));
   }
-  
-  resetForm(): void {
-    this.currentPersona = { nombre: '', edad: undefined };
-    this.editingPersona = false;
+
+  aplicarFiltros(): void {
+    this.cargando = true;
+    
+    // Preparar objeto de filtros para enviar al backend
+    const filtros: any = {};
+    
+    if (this.busqueda && this.busqueda.trim() !== '') {
+      filtros.busqueda = this.busqueda.trim();
+    }
+    
+    if (this.filtroEspecialidad && this.filtroEspecialidad !== 'Todas las especialidades') {
+      filtros.especialidad = this.filtroEspecialidad;
+    }
+    
+    if (this.filtroDia && this.filtroDia !== 'Todos los días') {
+      filtros.dia = this.filtroDia.toLowerCase();
+    }
+    
+    if (this.filtroBox && this.filtroBox !== 'Todos los boxes') {
+      filtros.box = this.filtroBox;
+    }
+    
+    // Enviar filtros al backend
+    this.personasService.buscarDoctores(filtros).subscribe({
+      next: (doctores) => {
+        this.doctoresFiltrados = doctores;
+        this.cargando = false;
+        console.log(`Resultados filtrados: ${doctores.length}`);
+      },
+      error: (err) => {
+        this.error = 'Error al aplicar filtros: ' + err.message;
+        this.cargando = false;
+        console.error('Error al aplicar filtros:', err);
+      }
+    });
+  }
+
+  limpiarFiltros(): void {
+    this.busqueda = '';
+    this.filtroEspecialidad = '';
+    this.filtroDia = '';
+    this.filtroBox = '';
+    this.doctoresFiltrados = [...this.doctores];
   }
 }

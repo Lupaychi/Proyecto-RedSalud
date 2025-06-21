@@ -1,0 +1,137 @@
+<div class="asignaciones-container">
+  <div class="card">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0"><i class="bi bi-list-check me-2"></i> LISTA DE ASIGNACIONES</h4>
+    </div>
+    
+    <div class="card-body">
+      <div *ngIf="loading" class="text-center my-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-2">Cargando asignaciones...</p>
+      </div>
+      
+      <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ error }}
+        <button type="button" class="btn-close" (click)="error = ''" aria-label="Close"></button>
+      </div>
+      
+      <!-- Filtros -->
+      <div class="filters-container mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="m-0"><i class="bi bi-funnel-fill me-2"></i>Filtrar por:</h5>
+          <button class="btn btn-sm btn-outline-secondary" (click)="limpiarFiltros()">
+            <i class="bi bi-x-circle me-1"></i>Limpiar filtros
+          </button>
+        </div>
+        
+        <div class="row g-3">
+          <div class="col-md-2">
+            <select class="form-select form-select-sm" [(ngModel)]="filtroPiso" (change)="aplicarFiltros()">
+              <option value="">Piso</option>
+              <option *ngFor="let piso of pisos" [value]="piso">{{ piso }}</option>
+            </select>
+          </div>
+          
+          <div class="col-md-2">
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="filtroBox" (input)="aplicarFiltros()" placeholder="Número de Box">
+          </div>
+          
+          <div class="col-md-2">
+            <select class="form-select form-select-sm" [(ngModel)]="filtroEspecialidad" (change)="aplicarFiltros()">
+              <option value="">Especialidad</option>
+              <option *ngFor="let esp of especialidades" [value]="esp">{{ esp }}</option>
+            </select>
+          </div>
+          
+          <div class="col-md-2">
+            <select class="form-select form-select-sm" [(ngModel)]="filtroTipo" (change)="aplicarFiltros()">
+              <option value="">Tipo de Box</option>
+              <option *ngFor="let tipo of tiposBox" [value]="tipo">{{ tipo }}</option>
+            </select>
+          </div>
+          
+          <div class="col-md-2">
+            <select class="form-select form-select-sm" [(ngModel)]="filtroHorario" (change)="aplicarFiltros()">
+              <option value="">Horario</option>
+              <option *ngFor="let horario of horarios" [value]="horario">{{ horario }}</option>
+            </select>
+          </div>
+          
+          <div class="col-md-2">
+            <select class="form-select form-select-sm" [(ngModel)]="filtroDoctor" (change)="aplicarFiltros()">
+              <option value="">Doctor</option>
+              <option *ngFor="let doctor of doctores" [value]="doctor">{{ doctor }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Resultados -->
+      <div class="result-info mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="text-muted">
+            Mostrando {{ asignacionesFiltradas.length }} de {{ asignaciones.length }} asignaciones
+          </span>
+          <a routerLink="/crear-asignacion" class="btn btn-success btn-sm">
+            <i class="bi bi-plus-circle me-1"></i> Nueva asignación
+          </a>
+        </div>
+      </div>
+      
+      <!-- Tabla de asignaciones -->
+      <div class="table-responsive">
+        <table class="table table-hover table-striped asignaciones-table">
+          <thead class="table-light">
+            <tr>
+              <th>Piso</th>
+              <th>Número de Box</th>
+              <th>Especialidad</th>
+              <th>Tipo de Box</th>
+              <th>Horario</th>
+              <th>Doctor</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let asignacion of asignacionesFiltradas">
+              <td>{{ asignacion.piso }}</td>
+              <td>{{ asignacion.boxNumero }}</td>
+              <td>
+                <span class="badge rounded-pill text-bg-info">
+                  {{ asignacion.especialidad }}
+                </span>
+              </td>
+              <td>
+                <span class="badge rounded-pill" [ngClass]="{'text-bg-success': asignacion.tipoBox === 'Consulta', 'text-bg-warning': asignacion.tipoBox === 'Procedimiento'}">
+                  {{ asignacion.tipoBox }}
+                </span>
+              </td>
+              <td>
+                {{ asignacion.horaInicio }} - {{ asignacion.horaFin }}
+                <span class="badge text-bg-secondary ms-1 text-capitalize">{{ asignacion.dia }}</span>
+              </td>
+              <td>{{ asignacion.doctorNombre }}</td>
+              <td>
+                <div class="btn-group btn-group-sm">
+                  <a [routerLink]="['/modificar-asignacion', asignacion.id]" class="btn btn-outline-primary">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <button class="btn btn-outline-danger" (click)="eliminarAsignacion(asignacion.id)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="asignacionesFiltradas.length === 0">
+              <td colspan="7" class="text-center py-4">
+                <i class="bi bi-inbox me-2"></i> No se encontraron asignaciones con los filtros seleccionados
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

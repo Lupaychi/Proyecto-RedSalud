@@ -1,0 +1,38 @@
+.asignaciones-container {
+  margin-bottom: 30px;
+}
+
+.filters-container {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.asignaciones-table th {
+  white-space: nowrap;
+}
+
+.asignaciones-table td {
+  vertical-align: middle;
+}
+
+.badge {
+  padding: 6px 10px;
+  font-weight: 500;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-danger:hover {
+  color: white;
+}
+
+.result-info {
+  border-top: 1px solid #e9ecef;
+  border-bottom: 1px solid #e9ecef;
+  padding: 10px 0;
+}
+
+.text-capitalize {
+  text-transform: capitalize;
+}

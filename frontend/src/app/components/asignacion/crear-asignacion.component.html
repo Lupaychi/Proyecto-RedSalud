@@ -1,0 +1,159 @@
+<div class="asignacion-container">
+  <div class="card">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0"><i class="bi bi-calendar-plus me-2"></i>CREAR ASIGNACIÓN</h4>
+    </div>
+    
+    <div class="card-body">
+      <div *ngIf="loading" class="text-center my-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-2">Cargando datos...</p>
+      </div>
+      
+      <div *ngIf="mensaje" class="alert alert-{{tipoMensaje}} alert-dismissible fade show" role="alert">
+        <i class="bi" [ngClass]="{
+          'bi-check-circle-fill': tipoMensaje === 'success',
+          'bi-exclamation-triangle-fill': tipoMensaje === 'warning',
+          'bi-x-circle-fill': tipoMensaje === 'danger'
+        }"></i> {{ mensaje }}
+        <button type="button" class="btn-close" (click)="mensaje = ''" aria-label="Close"></button>
+      </div>
+      
+      <div class="row">
+        <div class="col-md-5">
+          <form [formGroup]="asignacionForm" (ngSubmit)="crearAsignacion()">
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre del Doctor</label>
+              <select id="nombre" formControlName="nombre" class="form-select" [class.is-invalid]="asignacionForm.get('nombre')?.invalid && asignacionForm.get('nombre')?.touched">
+                <option value="" disabled selected>Seleccione un doctor</option>
+                <option *ngFor="let doctor of doctoresFiltrados" [value]="doctor.rut">
+                  {{ doctor.nombre }}
+                </option>
+              </select>
+              <div *ngIf="asignacionForm.get('nombre')?.invalid && asignacionForm.get('nombre')?.touched" class="invalid-feedback">
+                Este campo es obligatorio
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="piso" class="form-label">Piso</label>
+              <select id="piso" formControlName="piso" class="form-select" [class.is-invalid]="asignacionForm.get('piso')?.invalid && asignacionForm.get('piso')?.touched">
+                <option value="" disabled selected>Seleccione un piso</option>
+                <option *ngFor="let piso of pisos" [value]="piso">{{ piso }}</option>
+              </select>
+              <div *ngIf="asignacionForm.get('piso')?.invalid && asignacionForm.get('piso')?.touched" class="invalid-feedback">
+                Este campo es obligatorio
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="numeroBox" class="form-label">Número de Box</label>
+              <select id="numeroBox" formControlName="numeroBox" class="form-select" [class.is-invalid]="asignacionForm.get('numeroBox')?.invalid && asignacionForm.get('numeroBox')?.touched">
+                <option value="" disabled selected>Seleccione un box</option>
+                <option *ngFor="let box of boxesFiltrados" [value]="box.id">{{ box.numero }}</option>
+              </select>
+              <div *ngIf="asignacionForm.get('numeroBox')?.invalid && asignacionForm.get('numeroBox')?.touched" class="invalid-feedback">
+                Este campo es obligatorio
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="especialidad" class="form-label">Especialidad</label>
+              <select id="especialidad" formControlName="especialidad" class="form-select" [class.is-invalid]="asignacionForm.get('especialidad')?.invalid && asignacionForm.get('especialidad')?.touched">
+                <option value="" disabled selected>Seleccione una especialidad</option>
+                <option *ngFor="let especialidad of especialidades" [value]="especialidad">{{ especialidad }}</option>
+              </select>
+              <div *ngIf="asignacionForm.get('especialidad')?.invalid && asignacionForm.get('especialidad')?.touched" class="invalid-feedback">
+                Este campo es obligatorio
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="tipoBox" class="form-label">Tipo de Box</label>
+              <select id="tipoBox" formControlName="tipoBox" class="form-select" [class.is-invalid]="asignacionForm.get('tipoBox')?.invalid && asignacionForm.get('tipoBox')?.touched">
+                <option value="" disabled selected>Seleccione un tipo</option>
+                <option value="Consulta">Consulta</option>
+                <option value="Procedimiento">Procedimiento</option>
+              </select>
+              <div *ngIf="asignacionForm.get('tipoBox')?.invalid && asignacionForm.get('tipoBox')?.touched" class="invalid-feedback">
+                Este campo es obligatorio
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="dia" class="form-label">Día</label>
+              <select id="dia" formControlName="dia" (change)="actualizarDisponibilidadHoraria()" class="form-select" [class.is-invalid]="asignacionForm.get('dia')?.invalid && asignacionForm.get('dia')?.touched">
+                <option value="" disabled selected>Seleccione un día</option>
+                <option *ngFor="let dia of diasSemana" [value]="dia.toLowerCase()">{{ dia }}</option>
+              </select>
+              <div *ngIf="asignacionForm.get('dia')?.invalid && asignacionForm.get('dia')?.touched" class="invalid-feedback">
+                Este campo es obligatorio
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="horario" class="form-label">Horario Disponible</label>
+              <select id="horario" formControlName="horario" class="form-select" [class.is-invalid]="asignacionForm.get('horario')?.invalid && asignacionForm.get('horario')?.touched">
+                <option value="" disabled selected>Seleccione un horario</option>
+                <option *ngFor="let horario of horariosDisponibles; let i = index" [value]="horario" [disabled]="esCeldaOcupada(diasSemana.indexOf(asignacionForm.get('dia')?.value), i)">
+                  {{ horario }}
+                </option>
+              </select>
+              <div *ngIf="asignacionForm.get('horario')?.invalid && asignacionForm.get('horario')?.touched" class="invalid-feedback">
+                Este campo es obligatorio
+              </div>
+            </div>
+            
+            <div class="d-grid gap-2 mt-4">
+              <button type="submit" class="btn btn-success" [disabled]="asignacionForm.invalid">
+                <i class="bi bi-calendar-check me-2"></i> Asignar
+              </button>
+              <button type="button" class="btn btn-secondary" (click)="asignacionForm.reset()">
+                <i class="bi bi-x-circle me-2"></i> Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+        
+        <div class="col-md-7">
+          <div class="horarios-container">
+            <h5 class="text-primary mb-3"><i class="bi bi-calendar-week me-2"></i>Visualización de horarios</h5>
+            
+            <div class="table-responsive">
+              <table class="table table-bordered horario-table">
+                <thead class="table-light">
+                  <tr>
+                    <th>Hora</th>
+                    <th *ngFor="let dia of diasSemana">{{ dia }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let horario of horariosDisponibles; let i = index">
+                    <td class="text-center fw-bold">{{ horario }}</td>
+                    <td *ngFor="let dia of diasSemana; let j = index" 
+                        [ngClass]="{
+                          'ocupado': esCeldaOcupada(j, i),
+                          'disponible': !esCeldaOcupada(j, i),
+                          'seleccionado': asignacionForm.get('dia')?.value === dia.toLowerCase() && asignacionForm.get('horario')?.value === horario
+                        }">
+                      <i *ngIf="esCeldaOcupada(j, i)" class="bi bi-x-circle-fill text-danger"></i>
+                      <i *ngIf="!esCeldaOcupada(j, i)" class="bi bi-check-circle-fill text-success"></i>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="mt-3">
+              <span class="badge rounded-pill text-bg-success me-2"><i class="bi bi-check-circle-fill me-1"></i> Disponible</span>
+              <span class="badge rounded-pill text-bg-danger me-2"><i class="bi bi-x-circle-fill me-1"></i> Ocupado</span>
+              <span class="badge rounded-pill text-bg-primary"><i class="bi bi-cursor-fill me-1"></i> Seleccionado</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
