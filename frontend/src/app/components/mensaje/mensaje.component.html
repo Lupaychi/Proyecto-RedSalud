@@ -60,8 +60,8 @@
             
             <div class="col-md-4 mb-3">
               <div class="server-stat-card">
-                <div class="icon" [ngClass]="{'bg-success': mensajeBackend.serverInfo.status === 'online', 'bg-warning': mensajeBackend.serverInfo.status !== 'online'}">
-                  <i class="bi" [ngClass]="{'bi-check-circle': mensajeBackend.serverInfo.status === 'online', 'bi-dash-circle': mensajeBackend.serverInfo.status !== 'online'}"></i>
+                <div class="icon" [class.bg-success]="mensajeBackend.serverInfo.status === 'online'" [class.bg-warning]="mensajeBackend.serverInfo.status !== 'online'">
+                  <i class="bi" [class.bi-check-circle]="mensajeBackend.serverInfo.status === 'online'" [class.bi-dash-circle]="mensajeBackend.serverInfo.status !== 'online'"></i>
                 </div>
                 <div class="info">
                   <p class="label">Estado</p>

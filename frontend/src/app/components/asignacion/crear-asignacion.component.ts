@@ -1,8 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { PersonasService, Doctor } from '../../services/personas.service';
+import { PersonasService } from '../../services/personas.service';
 import { BoxesService } from '../../services/boxes.service';
+
+interface Doctor {
+  rut: string;
+  nombre: string;
+  especialidad: string;
+}
+
+interface Horario {
+  dia: string;
+  horaInicio: string;
+  horaFin: string;
+}
 
 @Component({
   selector: 'app-crear-asignacion',
@@ -112,7 +124,7 @@ export class CrearAsignacionComponent implements OnInit {
         this.horarioOcupado = Array(7).fill(0).map(() => Array(12).fill(false));
         
         // Marcar horarios ocupados
-        horarios.forEach(h => {
+        horarios.forEach((h: Horario) => {
           const hora = parseInt(h.horaInicio.split(':')[0]);
           const diaIndex = this.diasSemana.findIndex(d => d.toLowerCase() === h.dia.toLowerCase());
           if (diaIndex >= 0 && hora >= 8 && hora <= 19) {
@@ -138,7 +150,7 @@ export class CrearAsignacionComponent implements OnInit {
       };
       
       this.boxesService.crearAsignacion(asignacion).subscribe({
-        next: (response) => {
+        next: (_response) => {
           this.loading = false;
           this.mensaje = 'Asignación creada correctamente';
           this.tipoMensaje = 'success';
@@ -146,7 +158,7 @@ export class CrearAsignacionComponent implements OnInit {
           // Actualizar la visualización de horarios
           this.actualizarDisponibilidadHoraria();
         },
-        error: (error) => {
+        error: (error: Error) => {
           this.loading = false;
           this.mensaje = 'Error al crear la asignación: ' + (error.message || 'Error desconocido');
           this.tipoMensaje = 'danger';

@@ -1,15 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { JsonPipe } from '@angular/common';
-import { PersonasComponent } from './personas/personas.component';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, PersonasComponent, HttpClientModule, RouterModule],
+  imports: [CommonModule, HttpClientModule, RouterModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
@@ -24,6 +22,7 @@ export class AppComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
+    console.log('AppComponent inicializado');
     this.fetchData();
   }
 

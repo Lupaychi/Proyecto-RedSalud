@@ -1,0 +1,115 @@
+.medico-detalle-container {
+  margin-bottom: 30px;
+  padding: 20px 0;
+}
+
+.medico-card {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: none;
+  overflow: hidden;
+}
+
+.profile-section {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0d6efd;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 10px;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.info-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.info-value {
+  font-size: 1rem;
+}
+
+.horarios-section {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.horarios-table {
+  margin-bottom: 0;
+}
+
+.horarios-table th {
+  font-weight: 600;
+  color: #495057;
+}
+
+.horarios-table td {
+  vertical-align: middle;
+}
+
+.no-horarios {
+  color: #6c757d;
+}
+
+.no-horarios i {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+}
+
+.estado-badge {
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.estado-activo {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+.estado-sin {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.estado-vacaciones {
+  background-color: #cff4fc;
+  color: #055160;
+}
+
+.estado-licencia {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.estado-desconocido {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+.btn-group .btn {
+  padding: 0.25rem 0.5rem;
+}
+
+.btn-group .btn i {
+  font-size: 0.875rem;
+}

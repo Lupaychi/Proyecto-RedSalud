@@ -1,39 +1,38 @@
 import { Component, OnInit } from '@angular/core';
-import { ApiService } from '../../services/api.service';
+import { HttpClient } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-mensaje',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './mensaje.component.html',
   styleUrls: ['./mensaje.component.css']
 })
 export class MensajeComponent implements OnInit {
   mensajeBackend: any = null;
-  cargando: boolean = true;
+  cargando = false;
   error: string | null = null;
 
-  constructor(private apiService: ApiService) { }
+  constructor(private http: HttpClient) {}
 
-  ngOnInit(): void {
-    this.obtenerMensaje();
+  ngOnInit() {
+    this.recargarMensaje();
   }
 
-  obtenerMensaje(): void {
+  recargarMensaje() {
     this.cargando = true;
-    this.apiService.obtenerSaludo().subscribe({
-      next: (respuesta) => {
-        this.mensajeBackend = respuesta;
+    this.error = null;
+    
+    this.http.get('http://localhost:3001/api/saludo').subscribe({
+      next: (data) => {
+        this.mensajeBackend = data;
         this.cargando = false;
-        console.log('Mensaje recibido del backend:', respuesta);
       },
-      error: (error) => {
-        this.error = 'Error al conectar con el servidor. Verifica que el backend esté ejecutándose.';
+      error: (err) => {
+        this.error = 'Error al conectar con el servidor: ' + (err.message || 'Error desconocido');
         this.cargando = false;
-        console.error('Error:', error);
       }
     });
-  }
-
-  recargarMensaje(): void {
-    this.obtenerMensaje();
   }
 }

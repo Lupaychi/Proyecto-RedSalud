@@ -1,0 +1,88 @@
+.medico-container {
+  margin-bottom: 30px;
+}
+
+.filters-container {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.doctor-card {
+  transition: transform 0.3s, box-shadow 0.3s;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  overflow: hidden;
+}
+
+.doctor-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.doctor-card .card-header {
+  background-color: #f8f9fa;
+  padding: 15px;
+}
+
+.doctor-card .card-title {
+  font-weight: 600;
+  color: #343a40;
+}
+
+.doctor-card .card-subtitle {
+  font-size: 0.9rem;
+  margin-top: 5px;
+}
+
+.doctor-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+}
+
+.info-item i {
+  font-size: 1.1rem;
+  color: #0d6efd;
+  margin-right: 10px;
+  width: 20px;
+  text-align: center;
+}
+
+.estado-badge {
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.estado-badge.activo {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+.estado-badge.sin {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.estado-badge.vacaciones {
+  background-color: #cff4fc;
+  color: #055160;
+}
+
+.estado-badge.licencia {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.card-footer {
+  background-color: white;
+  padding: 15px;
+  border-top: 1px solid #e9ecef;
+}

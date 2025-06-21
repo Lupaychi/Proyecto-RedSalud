@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { BoxesService, Asignacion } from '../../services/boxes.service';
+import { RouterModule } from '@angular/router'; // Añadir RouterModule
+import { BoxesService } from '../../services/boxes.service';
 
 @Component({
   selector: 'app-lista-asignaciones',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule], // Añadir RouterModule
   templateUrl: './lista-asignaciones.component.html',
   styleUrls: ['./lista-asignaciones.component.css']
 })
