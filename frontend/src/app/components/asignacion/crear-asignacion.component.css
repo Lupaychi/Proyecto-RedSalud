@@ -2,58 +2,197 @@
   margin-bottom: 30px;
 }
 
+/* Estilos para el overlay de carga */
+.overlay-spinner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.spinner-container {
+  text-align: center;
+  background-color: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* Contenedor de horarios */
 .horarios-container {
   background-color: #f8f9fa;
   border-radius: 10px;
   padding: 20px;
   height: 100%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+/* Estilos para la tabla de horarios */
+.horario-table {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #dee2e6;
 }
 
 .horario-table th, 
 .horario-table td {
   text-align: center;
   vertical-align: middle;
-  padding: 8px;
+  padding: 10px 8px;
   font-size: 0.9rem;
+  position: relative;
+  min-width: 80px;
 }
 
 .horario-table th:first-child,
 .horario-table td:first-child {
   width: 80px;
   background-color: #f0f0f0;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
 }
 
+.horario-table th {
+  font-weight: 600;
+  background-color: #e9ecef;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.celda-contenido {
+  position: relative;
+  width: 100%;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Estados de las celdas */
 .horario-table .ocupado {
   background-color: rgba(220, 53, 69, 0.1);
   cursor: not-allowed;
+  transition: all 0.2s;
 }
 
 .horario-table .disponible {
   background-color: rgba(40, 167, 69, 0.1);
   cursor: pointer;
+  transition: all 0.2s;
 }
 
 .horario-table .disponible:hover {
   background-color: rgba(40, 167, 69, 0.2);
+  transform: scale(1.05);
 }
 
 .horario-table .seleccionado {
-  background-color: rgba(0, 123, 255, 0.2);
+  background-color: rgba(0, 123, 255, 0.15);
   border: 2px solid #0d6efd;
+  position: relative;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 5px rgba(13, 110, 253, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+  }
+}
+
+/* Estilos para el formulario */
+.form-container {
+  padding: 10px 0;
+}
+
+.form-section {
+  margin-bottom: 15px;
+  border: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s;
+}
+
+.form-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.form-section .card-header {
+  padding: 10px 15px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.form-section .card-body {
+  padding: 15px;
 }
 
 .form-label {
   font-weight: 500;
   color: #495057;
+  margin-bottom: 5px;
 }
 
-.form-select:hover {
-  border-color: var(--primary);
+.form-select, .form-control {
+  border: 1px solid #ced4da;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.9rem;
+  transition: all 0.2s;
 }
 
+.form-select:hover, .form-control:hover {
+  border-color: #0d6efd;
+}
+
+.form-select:focus, .form-control:focus {
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Estilo para botones */
+.btn {
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
+/* Estilos para mensajes y estados */
 .alert {
   display: flex;
   align-items: center;
+  border-radius: 8px;
+  padding: 12px 15px;
+  margin-bottom: 20px;
+  border-left: 5px solid;
 }
 
 .alert i {
@@ -61,7 +200,34 @@
   margin-right: 10px;
 }
 
-.spinner-border {
-  width: 3rem;
-  height: 3rem;
+.alert-success {
+  border-left-color: #28a745;
+}
+
+.alert-danger {
+  border-left-color: #dc3545;
+}
+
+.alert-warning {
+  border-left-color: #ffc107;
+}
+
+.alert-info {
+  border-left-color: #17a2b8;
+}
+
+/* Estilo para información de box seleccionado */
+.selected-box-info .card {
+  border-left: 4px solid #0d6efd;
+}
+
+.badge {
+  padding: 8px 12px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+}
+
+.text-capitalize {
+  text-transform: capitalize;
 }

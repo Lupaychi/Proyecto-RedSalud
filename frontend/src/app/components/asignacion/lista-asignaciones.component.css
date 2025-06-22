@@ -2,24 +2,97 @@
   margin-bottom: 30px;
 }
 
+/* Spinner de carga */
+.overlay-spinner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.spinner-container {
+  text-align: center;
+  background-color: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* Filtros */
 .filters-container {
   background-color: #f8f9fa;
   border-radius: 8px;
   padding: 15px;
   margin-bottom: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.accordion-button {
+  padding: 10px 15px;
+  font-weight: 500;
+}
+
+.form-label {
+  font-weight: 500;
+  margin-bottom: 3px;
+}
+
+/* Tabla de asignaciones */
+.asignaciones-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .asignaciones-table th {
   white-space: nowrap;
+  background-color: #f8f9fa;
+  font-weight: 600;
+  padding: 12px 15px;
+  border-bottom: 2px solid #e9ecef;
 }
 
 .asignaciones-table td {
   vertical-align: middle;
+  padding: 12px 15px;
 }
 
+.cursor-ordenable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s;
+}
+
+.cursor-ordenable:hover {
+  background-color: #e9ecef;
+}
+
+.cursor-ordenable i {
+  font-size: 0.8rem;
+}
+
+/* Badges y elementos de UI */
 .badge {
   padding: 6px 10px;
   font-weight: 500;
+}
+
+.result-info {
+  padding: 10px 0;
+  margin-bottom: 15px;
 }
 
 .btn-outline-primary:hover,
@@ -27,12 +100,93 @@
   color: white;
 }
 
-.result-info {
-  border-top: 1px solid #e9ecef;
-  border-bottom: 1px solid #e9ecef;
-  padding: 10px 0;
+/* Paginación */
+.pagination {
+  justify-content: center;
+  margin-top: 20px;
 }
 
-.text-capitalize {
-  text-transform: capitalize;
+.page-link {
+  padding: 8px 14px;
+  color: #007bff;
+  transition: all 0.2s;
+}
+
+.page-item.active .page-link {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.page-item.disabled .page-link {
+  color: #6c757d;
+}
+
+/* Estados de asignaciones */
+.estado-activo {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.estado-inactivo {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Mejoras adicionales */
+.table-responsive {
+  border-radius: 8px;
+  margin-bottom: 25px;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* Botones de acción */
+.action-buttons {
+  white-space: nowrap;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  margin-right: 5px;
+}
+
+.btn-sm:last-child {
+  margin-right: 0;
+}
+
+/* Mensajes de información */
+.alert {
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.alert-info {
+  color: #0c5460;
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+  .filters-container {
+    padding: 10px;
+  }
+  
+  .asignaciones-table th,
+  .asignaciones-table td {
+    padding: 10px;
+  }
+  
+  .btn-sm {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.825rem;
+  }
 }
