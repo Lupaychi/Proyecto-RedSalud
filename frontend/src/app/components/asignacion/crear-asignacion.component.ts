@@ -34,7 +34,7 @@ interface Box {
   styleUrls: ['./crear-asignacion.component.css']
 })
 export class CrearAsignacionComponent implements OnInit {
-  asignacionForm!: FormGroup; // Add the non-null assertion operator (!)
+  asignacionForm!: FormGroup;
   pisos: number[] = [];
   boxes: Box[] = [];
   boxesFiltrados: Box[] = [];
@@ -49,6 +49,14 @@ export class CrearAsignacionComponent implements OnInit {
   mensaje = '';
   tipoMensaje = '';
   tiposBox: string[] = ['Consulta', 'Procedimiento'];
+
+  // Agregar estas propiedades
+  submitted = false; // Para controlar si el formulario ha sido enviado
+  
+  // Getter para acceder fácilmente a los controles del formulario
+  get f() {
+    return this.asignacionForm.controls;
+  }
 
   constructor(
     private fb: FormBuilder, 
@@ -314,6 +322,18 @@ export class CrearAsignacionComponent implements OnInit {
       this.marcarCamposInvalidos();
       this.mostrarMensaje('Por favor, complete todos los campos obligatorios correctamente', 'warning');
     }
+  }
+
+  onSubmit(): void {
+    this.submitted = true;
+    
+    // Detener si el formulario es inválido
+    if (this.asignacionForm.invalid) {
+      console.error('Formulario inválido:', this.asignacionForm.errors);
+      return;
+    }
+    
+    // Resto de la lógica de envío...
   }
 
   private marcarCamposInvalidos(): void {

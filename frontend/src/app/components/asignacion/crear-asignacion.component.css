@@ -231,3 +231,32 @@
 .text-capitalize {
   text-transform: capitalize;
 }
+
+.form-text {
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.text-info {
+  color: #0dcaf0 !important;
+}
+
+.text-warning {
+  color: #ffc107 !important;
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
+
+/* Iconos en notas informativas */
+.form-text i {
+  vertical-align: middle;
+  font-size: 0.9rem;
+}
+
+/* Estilo para campos desactivados */
+select[disabled] {
+  background-color: #e9ecef;
+  opacity: 1;
+}

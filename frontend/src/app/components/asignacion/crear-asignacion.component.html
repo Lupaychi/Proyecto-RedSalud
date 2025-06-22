@@ -53,14 +53,26 @@
                   <h6 class="mb-0">1. Seleccione especialidad</h6>
                 </div>
                 <div class="card-body">
+                  <!-- Campo de Especialidad -->
                   <div class="mb-3">
-                    <label for="especialidad" class="form-label">Especialidad médica</label>
-                    <select id="especialidad" formControlName="especialidad" class="form-select" [class.is-invalid]="asignacionForm.get('especialidad')?.invalid && asignacionForm.get('especialidad')?.touched">
-                      <option value="" disabled selected>Seleccione una especialidad</option>
-                      <option *ngFor="let especialidad of especialidades" [value]="especialidad">{{ especialidad }}</option>
+                    <label for="especialidad" class="form-label">Especialidad*</label>
+                    <select 
+                      id="especialidad" 
+                      formControlName="especialidad" 
+                      class="form-select"
+                      [ngClass]="{'is-invalid': submitted && asignacionForm.get('especialidad')?.invalid}" 
+                      (change)="filtrarDoctoresPorEspecialidad($any($event.target).value)">
+                      <option value="">Seleccione una especialidad</option>
+                      <option *ngFor="let especialidad of especialidades" [value]="especialidad">
+                        {{ especialidad }}
+                      </option>
                     </select>
-                    <div *ngIf="asignacionForm.get('especialidad')?.invalid && asignacionForm.get('especialidad')?.touched" class="invalid-feedback">
-                      Debe seleccionar una especialidad
+                    <div class="form-text text-info">
+                      <i class="bi bi-info-circle-fill me-1"></i>
+                      Es necesario seleccionar primero la especialidad para mostrar los médicos disponibles.
+                    </div>
+                    <div *ngIf="submitted && asignacionForm.get('especialidad')?.errors" class="invalid-feedback">
+                      <div *ngIf="asignacionForm.get('especialidad')?.errors?.['required']">La especialidad es requerida</div>
                     </div>
                   </div>
                 </div>
@@ -72,19 +84,30 @@
                   <h6 class="mb-0">2. Seleccione doctor</h6>
                 </div>
                 <div class="card-body">
+                  <!-- Campo de Médico -->
                   <div class="mb-3">
-                    <label for="nombre" class="form-label">Doctor</label>
-                    <select id="nombre" formControlName="nombre" class="form-select" [class.is-invalid]="asignacionForm.get('nombre')?.invalid && asignacionForm.get('nombre')?.touched" [disabled]="!asignacionForm.get('especialidad')?.value">
-                      <option value="" disabled selected>Seleccione un doctor</option>
+                    <label for="nombre" class="form-label">Médico*</label>
+                    <select 
+                      id="nombre" 
+                      formControlName="nombre" 
+                      class="form-select"
+                      [ngClass]="{'is-invalid': submitted && asignacionForm.get('nombre')?.invalid}" 
+                      [attr.disabled]="!asignacionForm.get('especialidad')?.value ? true : null">
+                      <option value="">Seleccione un médico</option>
                       <option *ngFor="let doctor of doctoresFiltrados" [value]="doctor.rut">
-                        {{ doctor.nombre }}
+                        {{ doctor.nombre }} {{ doctor.apellido || '' }}
                       </option>
                     </select>
-                    <div *ngIf="asignacionForm.get('nombre')?.invalid && asignacionForm.get('nombre')?.touched" class="invalid-feedback">
-                      Debe seleccionar un doctor
+                    <div *ngIf="doctoresFiltrados?.length === 0 && asignacionForm.get('especialidad')?.value" class="form-text text-warning">
+                      <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                      No hay médicos disponibles para esta especialidad.
                     </div>
-                    <div *ngIf="doctoresFiltrados.length === 0 && asignacionForm.get('especialidad')?.value" class="form-text text-muted">
-                      No hay doctores disponibles para esta especialidad
+                    <div *ngIf="!asignacionForm.get('especialidad')?.value" class="form-text text-muted">
+                      <i class="bi bi-arrow-up-circle-fill me-1"></i>
+                      Seleccione primero una especialidad para ver los médicos disponibles.
+                    </div>
+                    <div *ngIf="submitted && f['nombre'].errors" class="invalid-feedback">
+                      <div *ngIf="f['nombre'].errors['required']">El médico es requerido</div>
                     </div>
                   </div>
                 </div>
