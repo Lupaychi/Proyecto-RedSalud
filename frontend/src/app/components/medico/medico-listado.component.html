@@ -32,27 +32,45 @@
             <div class="input-group">
               <span class="input-group-text"><i class="bi bi-search"></i></span>
               <input type="text" class="form-control" [(ngModel)]="filtroNombre" 
-                     (input)="aplicarFiltros()" placeholder="Buscar por nombre">
+                     (input)="aplicarFiltros()" placeholder="Buscar por nombre o RUT">
+              <button *ngIf="filtroNombre" class="btn btn-outline-secondary" type="button"
+                      (click)="filtroNombre=''; aplicarFiltros()">
+                <i class="bi bi-x"></i>
+              </button>
             </div>
           </div>
           
           <div class="col-md-4">
-            <select class="form-select" [(ngModel)]="filtroEspecialidad" (change)="aplicarFiltros()">
-              <option value="">Todas las especialidades</option>
-              <option *ngFor="let especialidad of especialidades" [value]="especialidad">
-                {{ especialidad }}
-              </option>
-            </select>
+            <div class="input-group">
+              <select class="form-select" [(ngModel)]="filtroEspecialidad" (change)="aplicarFiltros()">
+                <option value="">Todas las especialidades</option>
+                <optgroup *ngFor="let grupo of especialidadesAgrupadas" [label]="grupo.categoria">
+                  <option *ngFor="let esp of grupo.items" [value]="esp">
+                    {{ esp }}
+                  </option>
+                </optgroup>
+              </select>
+              <button *ngIf="filtroEspecialidad" class="btn btn-outline-secondary" type="button"
+                      (click)="filtroEspecialidad=''; aplicarFiltros()">
+                <i class="bi bi-x"></i>
+              </button>
+            </div>
           </div>
           
           <div class="col-md-4">
-            <select class="form-select" [(ngModel)]="filtroEstado" (change)="aplicarFiltros()">
-              <option value="">Todos los estados</option>
-              <option value="Activo">Activo</option>
-              <option value="Sin agenda">Sin agenda</option>
-              <option value="Vacaciones">Vacaciones</option>
-              <option value="Licencia">Licencia</option>
-            </select>
+            <div class="input-group">
+              <select class="form-select" [(ngModel)]="filtroEstado" (change)="aplicarFiltros()">
+                <option value="">Todos los estados</option>
+                <option value="Activo">Activo</option>
+                <option value="Sin agenda">Sin agenda</option>
+                <option value="Vacaciones">Vacaciones</option>
+                <option value="Licencia">Licencia</option>
+              </select>
+              <button *ngIf="filtroEstado" class="btn btn-outline-secondary" type="button"
+                      (click)="filtroEstado=''; aplicarFiltros()">
+                <i class="bi bi-x"></i>
+              </button>
+            </div>
           </div>
         </div>
       </div>
