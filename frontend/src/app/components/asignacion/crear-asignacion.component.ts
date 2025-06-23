@@ -248,13 +248,15 @@ export class CrearAsignacionComponent implements OnInit {
       this.doctoresFiltrados = [];
       return;
     }
-    
-    console.log('Filtrando doctores por especialidad:', especialidad);
-    this.doctoresFiltrados = this.doctores.filter(doctor => doctor.especialidad === especialidad);
+
+    // Coincidencia flexible, igual que en el directorio médico
+    this.doctoresFiltrados = this.doctores.filter(doctor =>
+      doctor.especialidad.toLowerCase().includes(especialidad.toLowerCase())
+    );
     console.log('Doctores filtrados:', this.doctoresFiltrados);
-    
+
     this.asignacionForm.get('nombre')?.setValue('');
-    
+
     // Si solo hay un doctor disponible con esta especialidad, lo seleccionamos automáticamente
     if (this.doctoresFiltrados.length === 1) {
       this.asignacionForm.get('nombre')?.setValue(this.doctoresFiltrados[0].rut);
