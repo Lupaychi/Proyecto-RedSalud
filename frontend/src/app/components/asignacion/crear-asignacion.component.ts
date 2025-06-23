@@ -521,4 +521,8 @@ export class CrearAsignacionComponent implements OnInit {
       
     console.log('Especialidades agrupadas:', this.especialidadesAgrupadas);
   }
+
+  volverALista(): void {
+    this.router.navigate(['/lista-asignaciones']);
+  }
 }
