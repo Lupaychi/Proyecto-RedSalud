@@ -54,12 +54,22 @@
                   </div>
                 </div>
                 
-                <div class="col-md-2 col-sm-6">
-                  <label for="filtroEspecialidad" class="form-label small">Especialidad</label>
-                  <select id="filtroEspecialidad" class="form-select form-select-sm" [(ngModel)]="filtroEspecialidad" (change)="aplicarFiltros()">
-                    <option value="">Todas</option>
-                    <option *ngFor="let esp of especialidades" [value]="esp">{{ esp }}</option>
-                  </select>
+                <!-- Versión con agrupaciones por categoría -->
+                <div class="col-md-4">
+                  <label for="filtroEspecialidadAgrupado" class="form-label small">Especialidad</label>
+                  <div class="input-group">
+                    <select id="filtroEspecialidadAgrupado" class="form-select" 
+                            [(ngModel)]="filtroEspecialidad" (change)="aplicarFiltros()">
+                      <option value="">Todas las especialidades</option>
+                      <optgroup *ngFor="let grupo of especialidadesAgrupadas" [label]="grupo.categoria">
+                        <option *ngFor="let esp of grupo.items" [value]="esp">{{ esp }}</option>
+                      </optgroup>
+                    </select>
+                    <button *ngIf="filtroEspecialidad" class="btn btn-outline-secondary" type="button"
+                            (click)="filtroEspecialidad=''; aplicarFiltros()">
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
                 </div>
                 
                 <div class="col-md-2 col-sm-6">

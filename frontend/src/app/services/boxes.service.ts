@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 export interface Box {
   id: string;
@@ -164,5 +165,19 @@ export class BoxesService {
       success: true,
       mensaje: 'Asignación eliminada correctamente'
     });
+  }
+
+  obtenerEspecialidades(): Observable<string[]> {
+    // Usando la URL correspondiente a tu API
+    return this.http.get<any[]>(`${this.apiUrl}/especialidades`).pipe(
+      map(data => {
+        // Extraer solo los nombres de especialidades
+        return [...new Set(data.map(item => item.nombre))].filter(Boolean).sort();
+      }),
+      catchError(error => {
+        console.error('Error al obtener especialidades:', error);
+        return of([]); // Devolver array vacío en caso de error
+      })
+    );
   }
 }

@@ -39,6 +39,7 @@ export class CrearAsignacionComponent implements OnInit {
   boxes: Box[] = [];
   boxesFiltrados: Box[] = [];
   especialidades: string[] = [];
+  especialidadesAgrupadas: { categoria: string, items: string[] }[] = [];
   doctores: Doctor[] = [];
   doctoresFiltrados: Doctor[] = [];
   horariosDisponibles: string[] = [];
@@ -119,7 +120,8 @@ export class CrearAsignacionComponent implements OnInit {
         console.log('Estado final de carga:',
           { pisos: this.pisos, 
             boxes: this.boxes, 
-            especialidades: this.especialidades, 
+            especialidades: this.especialidades,
+            especialidadesAgrupadas: this.especialidadesAgrupadas, // Agregar esto
             doctores: this.doctores,
             horariosDisponibles: this.horariosDisponibles 
           });
@@ -183,14 +185,28 @@ export class CrearAsignacionComponent implements OnInit {
       this.loading = true;
       this.personasService.obtenerEspecialidades().subscribe({
         next: especialidades => {
-          console.log('Especialidades cargadas:', especialidades); // Para depuración
+          console.log('Especialidades cargadas:', especialidades);
           this.especialidades = especialidades || [];
+          
+          // Si no hay especialidades del servicio, usar las de respaldo
+          if (this.especialidades.length === 0) {
+            this.especialidades = this.obtenerEspecialidadesRespaldo();
+          }
+          
+          // Agrupar especialidades
+          this.agruparEspecialidades();
+          
           this.loading = false;
           resolve();
         },
         error: err => {
           console.error('Error al cargar especialidades:', err);
-          this.mostrarMensaje('Error al cargar especialidades: ' + err.message, 'danger');
+          this.mostrarMensaje('Error al cargar especialidades: ' + err.message, 'warning');
+          
+          // Usar especialidades de respaldo
+          this.especialidades = this.obtenerEspecialidadesRespaldo();
+          this.agruparEspecialidades();
+          
           this.loading = false;
           resolve();
         }
@@ -395,5 +411,112 @@ export class CrearAsignacionComponent implements OnInit {
     if (!id || !this.boxes || this.boxes.length === 0) return 'No disponible';
     const box = this.boxes.find(b => b.id === id);
     return box ? box.numero : 'No encontrado';
+  }
+
+  // Agregar método para obtener especialidades de respaldo
+  private obtenerEspecialidadesRespaldo(): string[] {
+    return [
+      "Anestesiologia", "Anticoagulacion oral", "Atencion consulta matrona", "Bioimpedanciometria",
+      "Broncopulmonar adulto", "Broncopulmonar infantil", "Cardiologia adulto", "Cardiologia arritmia",
+      "Cardiologia infantil", "Cirugia bariatrica", "Cirugia bariatrica y control post op",
+      "Cirugia bariatrica y digestiva y control post op", "Cirugia bariatrica y pared abdominal",
+      "Cirugia cardiaca", "Cirugia de cabeza y cuello", "Cirugia de mamas", "Cirugia de torax",
+      "Cirugia enferm. digestiva y bariatrica", "Cirugia general adulto", 
+      "Cirugia general adulto y bariatrico", "Cirugia general adulto y cabeza y cuello",
+      "Cirugia general adulto y coloproctologia", "Cirugia general adulto y diagnostico endoscopia",
+      "Cirugia general infantil", "Cirugia general infantil  /  urologia infantil",
+      "Cirugia maxilo facial", "Cirugia vascular", "Cuidados paliativos", "Curaciones varias",
+      "Electrocardiograma (ecg) de reposo", "Endocrinologia adulto",
+      "Evaluacion pre-quirurgica de enfermeria", "Examen de sangre / orina / otros adulto",
+      "Examen de sangre / orina / otros infantil", "Examen ginecológico (pap / otros)",
+      "Examen pcr covid asintomático (sin orden médica) // tes de antigeno covid-19",
+      "Examen pcr covid sintomático (con orden médica)  // tes de antigeno covid-19",
+      "Examen y pcr preoperatorio", "Fisiatra adulto", "Fisiatria adulto e infantil",
+      "Fonoaudiologia ( reabilitacion implante coclear )", "Gastroenterologia adulto",
+      "Ginecologia general y climaterio y menopausia",
+      "Ginecologia general y ginecologia reproductiva e infertilidad",
+      "Ginecologia general y ginecologia reproductiva e infertilidad y endometrio",
+      "Ginecologia general y oncologica", "Ginecologia materno fetal",
+      "Ginecologia oncologica", "Ginecologia y endometriosis", "Ginecologia y obstetricia",
+      "Hematologia adulto", "Hematologia infantil", "Insuficiencia cardiaca", "Inyecciones",
+      "Kn. respiratorio", "Manejo del dolor no oncologico", "Medicina general adulto",
+      "Medicina general infantil", "Medicina interna", "Medicina interna y medicina gral ad",
+      "Nefrologia adulto", "Nefrologia infantil", "Neonatologia", "Neurocirugia adulto",
+      "Neurocirugia adulto y neurocirugia de columna",
+      "Neurocirugia adulto y neurocirugia de columna y post operatorio",
+      "Neurologia adulto", "Neurologia infantil", "Nutricion adulto y enfermedades cronicas",
+      "Nutricion adulto y enfermedades cronicas y diabetes", "Nutricion adulto y oncologica",
+      "Nutricion enfermedades cronicas", "Nutricion infanto-juvenil",
+      "Nutricionista adulto y bariatrica", "Nutriologia adulto",
+      "Nutriologia adulto y diabetologia adulto y evaluacion",
+      "Nutriologia adulto y nutriologia bariatrica", "Oftalmologia  adulto e infantil",
+      "Oncologia cuidados paliativos adulto", "Oncologia medica adulto",
+      "Otorrinolaringologia adulto", "Otorrinolaringologia adulto / infantil",
+      "Pediatría", "Psicologia adulto", "Psicologia adulto y bariatrica",
+      "Psicologia adulto y psicologia oncologica", "Psicologia infantil y psicologia oncologica",
+      "Psicologia infanto-juvenil", "Psicologia infanto-juvenil y oncologia infantil",
+      "Reumatologia", "Tens vascular", "Tm otorrino", "Traumatologia adulto",
+      "Traumatologia adulto y de cadera", "Traumatologia adulto y de hombro",
+      "Traumatologia adulto y de rodilla", "Traumatologia adulto y deportivo adulto",
+      "Traumatologia adulto y tobillo y pie", "Traumatologia de cadera y rodiila",
+      "Traumatologia de columna", "Traumatologia de hombro", "Traumatologia de mano",
+      "Traumatologia de rodilla", "Traumatologia de tobillo y pie",
+      "Traumatologia y ortopedia infantil", "Urologia adulto"
+    ];
+  }
+
+  // Agregar método para agrupar especialidades (mismo que en lista-asignaciones)
+  agruparEspecialidades(): void {
+    const grupos: {[key: string]: string[]} = {};
+    
+    this.especialidades.forEach(especialidad => {
+      if (!especialidad) return;
+      
+      let categoria = '';
+      const palabras = especialidad.split(' ');
+      
+      if (palabras.length > 0) {
+        if (palabras[0] === 'Cirugia') {
+          if (palabras.length > 1) {
+            if (['bariatrica', 'cardiaca', 'de', 'enferm.', 'general', 'maxilo', 'vascular'].includes(palabras[1].toLowerCase())) {
+              categoria = `Cirugia ${palabras[1]}`;
+            } else {
+              categoria = 'Cirugia';
+            }
+          } else {
+            categoria = 'Cirugia';
+          }
+        } else if (palabras[0] === 'Traumatologia') {
+          if (palabras.length > 1) {
+            if (['adulto', 'de', 'y'].includes(palabras[1].toLowerCase())) {
+              categoria = `Traumatologia ${palabras[1]}`;
+            } else {
+              categoria = 'Traumatologia';
+            }
+          } else {
+            categoria = 'Traumatologia';
+          }
+        } else {
+          categoria = palabras[0];
+        }
+      }
+      
+      if (!categoria) {
+        categoria = 'Otros';
+      }
+      
+      if (!grupos[categoria]) {
+        grupos[categoria] = [];
+      }
+      
+      grupos[categoria].push(especialidad);
+    });
+    
+    // Convertir a array para el template
+    this.especialidadesAgrupadas = Object.entries(grupos)
+      .map(([categoria, items]) => ({ categoria, items: items.sort() }))
+      .sort((a, b) => a.categoria.localeCompare(b.categoria));
+      
+    console.log('Especialidades agrupadas:', this.especialidadesAgrupadas);
   }
 }
