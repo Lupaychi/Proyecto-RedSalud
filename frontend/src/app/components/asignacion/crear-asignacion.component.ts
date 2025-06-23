@@ -53,7 +53,9 @@ export class CrearAsignacionComponent implements OnInit {
 
   // Agregar estas propiedades
   submitted = false; // Para controlar si el formulario ha sido enviado
-  
+  confirmarHorario: { dia: string, hora: string } | null = null;
+  mostrarConfirmacionAsignacion = false;
+
   // Getter para acceder fácilmente a los controles del formulario
   get f() {
     return this.asignacionForm.controls;
@@ -96,11 +98,27 @@ export class CrearAsignacionComponent implements OnInit {
     this.asignacionForm.get('especialidad')?.valueChanges.subscribe(especialidad => {
       if (especialidad) {
         this.filtrarDoctoresPorEspecialidad(especialidad);
+
+        // Selección automática de piso según especialidad
+        const piso = this.pisoPorEspecialidad(especialidad);
+        if (piso !== null) {
+          this.asignacionForm.get('piso')?.setValue(piso);
+          this.filtrarBoxesPorPiso(piso);
+        } else {
+          // Si no hay piso asociado, limpia la selección
+          this.asignacionForm.get('piso')?.setValue('');
+          this.boxesFiltrados = [];
+        }
       }
     });
 
     this.asignacionForm.get('numeroBox')?.valueChanges.subscribe(boxId => {
       if (boxId && this.asignacionForm.get('dia')?.value) {
+        this.actualizarDisponibilidadHoraria();
+      }
+    });
+    this.asignacionForm.get('dia')?.valueChanges.subscribe(dia => {
+      if (dia && this.asignacionForm.get('numeroBox')?.value) {
         this.actualizarDisponibilidadHoraria();
       }
     });
@@ -217,10 +235,11 @@ export class CrearAsignacionComponent implements OnInit {
   private generarHorariosDisponibles(): Promise<void> {
     return new Promise((resolve) => {
       this.horariosDisponibles = [];
-      for (let i = 8; i <= 19; i++) {
-        this.horariosDisponibles.push(`${i.toString().padStart(2, '0')}:00`);
+      for (let h = 8; h < 20; h++) {
+        this.horariosDisponibles.push(`${h.toString().padStart(2, '0')}:00`);
+        this.horariosDisponibles.push(`${h.toString().padStart(2, '0')}:30`);
       }
-      console.log('Horarios disponibles generados:', this.horariosDisponibles);
+      this.horariosDisponibles.push('20:00');
       resolve();
     });
   }
@@ -230,14 +249,9 @@ export class CrearAsignacionComponent implements OnInit {
       this.boxesFiltrados = [];
       return;
     }
-    
-    console.log('Filtrando boxes por piso:', piso);
     this.boxesFiltrados = this.boxes.filter(box => box.piso === piso);
-    console.log('Boxes filtrados:', this.boxesFiltrados);
-    
     this.asignacionForm.get('numeroBox')?.setValue('');
-    
-    // Si solo hay un box disponible en este piso, lo seleccionamos automáticamente
+    // Selecciona automáticamente si solo hay uno
     if (this.boxesFiltrados.length === 1) {
       this.asignacionForm.get('numeroBox')?.setValue(this.boxesFiltrados[0].id);
     }
@@ -266,37 +280,31 @@ export class CrearAsignacionComponent implements OnInit {
   actualizarDisponibilidadHoraria(): void {
     const boxId = this.asignacionForm.get('numeroBox')?.value;
     const diaSeleccionado = this.asignacionForm.get('dia')?.value;
-    
+
     if (boxId && diaSeleccionado) {
       this.loading = true;
-      this.inicializarMatrizHorarios();
-      
+      // Inicializa la matriz de horarios ocupados
+      this.horarioOcupado = Array(7).fill(0).map(() => Array(this.horariosDisponibles.length).fill(false));
       this.boxesService.obtenerDisponibilidadHoraria(boxId, diaSeleccionado).subscribe({
-        next: horarios => {
-          // Marcar horarios ocupados
+        next: (horarios: Horario[]) => {
           horarios.forEach((h: Horario) => {
-            const hora = parseInt(h.horaInicio.split(':')[0]);
-            const diaIndex = this.diasSemana.findIndex(d => d.toLowerCase() === h.dia.toLowerCase());
-            if (diaIndex >= 0 && hora >= 8 && hora <= 19) {
-              this.horarioOcupado[diaIndex][hora - 8] = true;
+            const idx = this.horariosDisponibles.indexOf(h.horaInicio);
+            const diaIdx = this.diasSemana.findIndex(d => d.toLowerCase() === h.dia.toLowerCase());
+            if (diaIdx >= 0 && idx >= 0) {
+              this.horarioOcupado[diaIdx][idx] = true;
             }
           });
-          
-          // Restablecer el horario seleccionado si está ocupado
+          // Limpia el horario seleccionado si está ocupado
           const horarioSeleccionado = this.asignacionForm.get('horario')?.value;
-          if (horarioSeleccionado) {
-            const hora = parseInt(horarioSeleccionado.split(':')[0]);
-            const diaIndex = this.diasSemana.findIndex(d => d.toLowerCase() === diaSeleccionado);
-            if (this.horarioOcupado[diaIndex][hora - 8]) {
-              this.asignacionForm.get('horario')?.setValue('');
-            }
+          const idx = this.horariosDisponibles.indexOf(horarioSeleccionado);
+          const diaIdx = this.diasSemana.findIndex(d => d.toLowerCase() === diaSeleccionado);
+          if (idx >= 0 && diaIdx >= 0 && this.horarioOcupado[diaIdx][idx]) {
+            this.asignacionForm.get('horario')?.setValue('');
           }
-          
           this.loading = false;
         },
         error: err => {
           this.loading = false;
-          console.error('Error al obtener disponibilidad horaria:', err);
           this.mostrarMensaje('Error al verificar disponibilidad: ' + err.message, 'warning');
         }
       });
@@ -382,19 +390,34 @@ export class CrearAsignacionComponent implements OnInit {
   }
 
   esCeldaOcupada(dia: number, hora: number): boolean {
-    return this.horarioOcupado[dia][hora];
+    return this.horarioOcupado[dia]?.[hora] ?? false;
   }
 
   seleccionarCelda(dia: number, hora: number): void {
+    this.onIntentarSeleccionarHorario(dia, hora);
+  }
+
+  onIntentarSeleccionarHorario(dia: number, hora: number): void {
     if (!this.esCeldaOcupada(dia, hora)) {
-      const diaSeleccionado = this.diasSemana[dia].toLowerCase();
-      const horarioSeleccionado = this.horariosDisponibles[hora];
-      
-      this.asignacionForm.patchValue({
-        dia: diaSeleccionado,
-        horario: horarioSeleccionado
-      });
+      this.confirmarHorario = {
+        dia: this.diasSemana[dia].toLowerCase(),
+        hora: this.horariosDisponibles[hora]
+      };
     }
+  }
+
+  confirmarSeleccionHorario(): void {
+    if (this.confirmarHorario) {
+      this.asignacionForm.patchValue({
+        dia: this.confirmarHorario.dia,
+        horario: this.confirmarHorario.hora
+      });
+      this.confirmarHorario = null;
+    }
+  }
+
+  cancelarSeleccionHorario(): void {
+    this.confirmarHorario = null;
   }
 
   cancelar(): void {
@@ -524,5 +547,30 @@ export class CrearAsignacionComponent implements OnInit {
 
   volverALista(): void {
     this.router.navigate(['/lista-asignaciones']);
+  }
+
+  private pisoPorEspecialidad(especialidad: string): number | null {
+    if (!especialidad) return null;
+    const esp = especialidad.toLowerCase();
+
+    if (esp.includes('ginecologia')) return 5;
+    if (esp.includes('traumatologia')) return 9;
+    if (esp.includes('cirugia vascular')) return 7;
+    if (esp.includes('cardiologia')) return 6;
+    // Agrega aquí más reglas según tu lógica real
+    return null;
+  }
+
+  onIntentarConfirmarAsignacion(): void {
+    this.mostrarConfirmacionAsignacion = true;
+  }
+
+  onCancelarConfirmacionAsignacion(): void {
+    this.mostrarConfirmacionAsignacion = false;
+  }
+
+  onConfirmarAsignacionFinal(): void {
+    this.mostrarConfirmacionAsignacion = false;
+    this.crearAsignacion();
   }
 }

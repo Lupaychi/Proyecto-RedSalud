@@ -218,7 +218,10 @@
               </div>
               
               <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-success" [disabled]="asignacionForm.invalid || submitting">
+                <button type="button"
+                        class="btn btn-success"
+                        [disabled]="asignacionForm.invalid || submitting"
+                        (click)="onIntentarConfirmarAsignacion()">
                   <i class="bi bi-calendar-check me-2"></i> Confirmar asignación
                 </button>
                 <button type="button" class="btn btn-outline-secondary" (click)="cancelar()">
@@ -292,6 +295,44 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Popup de confirmación de horario -->
+<div *ngIf="confirmarHorario" class="modal-backdrop show" style="z-index: 1050;"></div>
+<div *ngIf="confirmarHorario" class="modal d-block" tabindex="-1" style="z-index: 1060;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">¿Confirmar horario?</h5>
+      </div>
+      <div class="modal-body">
+        <p>¿Desea asignar el horario <strong>{{ confirmarHorario.hora }}</strong> el día <strong>{{ confirmarHorario.dia | titlecase }}</strong>?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancelarSeleccionHorario()">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="confirmarSeleccionHorario()">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Popup de confirmación de asignación -->
+<div *ngIf="mostrarConfirmacionAsignacion" class="modal-backdrop show" style="z-index: 1050;"></div>
+<div *ngIf="mostrarConfirmacionAsignacion" class="modal d-block" tabindex="-1" style="z-index: 1060;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">¿Confirmar asignación?</h5>
+      </div>
+      <div class="modal-body">
+        <p>¿Está seguro que desea crear esta asignación?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="onCancelarConfirmacionAsignacion()">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="onConfirmarAsignacionFinal()">Confirmar</button>
       </div>
     </div>
   </div>
