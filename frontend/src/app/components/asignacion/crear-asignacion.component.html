@@ -91,12 +91,9 @@
                       id="nombre" 
                       formControlName="nombre" 
                       class="form-select"
-                      [ngClass]="{'is-invalid': submitted && asignacionForm.get('nombre')?.invalid}" 
-                      [attr.disabled]="!asignacionForm.get('especialidad')?.value ? true : null">
-                      <option value="">Seleccione un médico</option>
-                      <option *ngFor="let doctor of doctoresFiltrados" [value]="doctor.rut">
-                        {{ doctor.nombre }} {{ doctor.apellido || '' }}
-                      </option>
+                      [ngClass]="{'is-invalid': submitted && f['nombre'].invalid}">
+                      <option value="" disabled selected>Seleccione un médico</option>
+                      <option *ngFor="let doc of doctoresFiltrados" [value]="doc.rut">{{ doc.nombre }}</option>
                     </select>
                     <div *ngIf="doctoresFiltrados?.length === 0 && asignacionForm.get('especialidad')?.value" class="form-text text-warning">
                       <i class="bi bi-exclamation-triangle-fill me-1"></i>
@@ -132,7 +129,7 @@
                   
                   <div class="mb-3">
                     <label for="numeroBox" class="form-label">Número de Box</label>
-                    <select id="numeroBox" formControlName="numeroBox" class="form-select" [class.is-invalid]="asignacionForm.get('numeroBox')?.invalid && asignacionForm.get('numeroBox')?.touched" [disabled]="!asignacionForm.get('piso')?.value">
+                    <select id="numeroBox" formControlName="numeroBox" class="form-select" [disabled]="!asignacionForm.get('piso')?.value">
                       <option value="" disabled selected>Seleccione un box</option>
                       <option *ngFor="let box of boxesFiltrados" [value]="box.id">{{ box.numero }}</option>
                     </select>
@@ -334,6 +331,59 @@
         <button type="button" class="btn btn-secondary" (click)="onCancelarConfirmacionAsignacion()">Cancelar</button>
         <button type="button" class="btn btn-primary" (click)="onConfirmarAsignacionFinal()">Confirmar</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<div class="card mt-4">
+  <div class="card-header bg-secondary text-white">
+    <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Asignaciones filtradas</h5>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped">
+        <thead>
+          <tr class="table-primary">
+            <th>Piso</th>
+            <th>Número de Box</th>
+            <th>Especialidad</th>
+            <th>Tipo</th>
+            <th>Día</th>
+            <th>Horario</th>
+            <th>Médico</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let asignacion of asignacionesFiltradas">
+            <td><span class="badge bg-secondary">{{ asignacion.piso }}</span></td>
+            <td><span class="badge bg-dark">{{ asignacion.boxNumero }}</span></td>
+            <td><span class="badge rounded-pill text-bg-info"> {{ asignacion.especialidad }} </span></td>
+            <td>
+              <span class="badge rounded-pill"
+                    [ngClass]="{'text-bg-warning': asignacion.tipoBox === 'Procedimiento', 'text-bg-success': asignacion.tipoBox === 'Consulta'}">
+                <i class="me-1" [ngClass]="{'bi bi-tools': asignacion.tipoBox === 'Procedimiento', 'bi-journal-medical': asignacion.tipoBox === 'Consulta'}"></i>
+                {{ asignacion.tipoBox }}
+              </span>
+            </td>
+            <td><span class="badge bg-light text-dark text-capitalize"> {{ asignacion.dia }} </span></td>
+            <td>
+              <span class="badge bg-light text-dark">
+                <i class="bi bi-clock me-1"></i>
+                {{ asignacion.horaInicio }} - {{ asignacion.horaFin }}
+              </span>
+            </td>
+            <td>
+              <div class="d-flex align-items-center">
+                <i class="bi bi-person-badge me-1"></i> {{ asignacion.doctorNombre }}
+              </div>
+            </td>
+            <td>
+              <!-- Acciones -->
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

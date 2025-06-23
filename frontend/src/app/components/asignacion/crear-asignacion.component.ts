@@ -55,6 +55,7 @@ export class CrearAsignacionComponent implements OnInit {
   submitted = false; // Para controlar si el formulario ha sido enviado
   confirmarHorario: { dia: string, hora: string } | null = null;
   mostrarConfirmacionAsignacion = false;
+  asignacionesFiltradas: any[] = []; // Asegúrate de tener esta propiedad
 
   // Getter para acceder fácilmente a los controles del formulario
   get f() {
@@ -85,7 +86,25 @@ export class CrearAsignacionComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarDatos();
+    this.cargarAsignacionesLocales(); // <--- Agrega esta línea
     this.configurarEventosFormulario();
+  }
+
+  cargarAsignacionesLocales(): void {
+    // 1. Carga las del backend (si tienes un método para eso)
+    this.boxesService.obtenerAsignaciones().subscribe({
+      next: (asignacionesBackend) => {
+        // 2. Carga las del localStorage
+        const asignacionesLS = JSON.parse(localStorage.getItem('asignaciones') || '[]');
+        // 3. Combina ambas (puedes evitar duplicados si lo deseas)
+        this.asignacionesFiltradas = [...asignacionesBackend, ...asignacionesLS];
+      },
+      error: () => {
+        // Si falla el backend, muestra solo las locales
+        const asignacionesLS = JSON.parse(localStorage.getItem('asignaciones') || '[]');
+        this.asignacionesFiltradas = asignacionesLS;
+      }
+    });
   }
 
   private configurarEventosFormulario(): void {
@@ -245,16 +264,9 @@ export class CrearAsignacionComponent implements OnInit {
   }
 
   filtrarBoxesPorPiso(piso: number): void {
-    if (!piso || !this.boxes || this.boxes.length === 0) {
-      this.boxesFiltrados = [];
-      return;
-    }
-    this.boxesFiltrados = this.boxes.filter(box => box.piso === piso);
-    this.asignacionForm.get('numeroBox')?.setValue('');
-    // Selecciona automáticamente si solo hay uno
-    if (this.boxesFiltrados.length === 1) {
-      this.asignacionForm.get('numeroBox')?.setValue(this.boxesFiltrados[0].id);
-    }
+    // Asegúrate de que 'boxes' contiene TODOS los boxes de todos los pisos
+    this.boxesFiltrados = this.boxes.filter(box => box.piso === +piso);
+    // Si tienes un filtro adicional por especialidad o tipo, revisa que no esté limitando de más
   }
 
   filtrarDoctoresPorEspecialidad(especialidad: string): void {
@@ -315,7 +327,7 @@ export class CrearAsignacionComponent implements OnInit {
     if (this.asignacionForm.valid && !this.submitting) {
       this.submitting = true;
       this.loading = true;
-      
+
       const asignacion = {
         doctorRut: this.asignacionForm.get('nombre')?.value,
         boxId: this.asignacionForm.get('numeroBox')?.value,
@@ -323,25 +335,33 @@ export class CrearAsignacionComponent implements OnInit {
         horaInicio: this.asignacionForm.get('horario')?.value,
         horaFin: this.calcularHoraFin(this.asignacionForm.get('horario')?.value),
         especialidad: this.asignacionForm.get('especialidad')?.value,
-        tipoBox: this.asignacionForm.get('tipoBox')?.value
+        tipoBox: this.asignacionForm.get('tipoBox')?.value,
+        // Agrega otros campos necesarios aquí
+        id: Date.now().toString(), // Genera un id simple
+        piso: this.asignacionForm.get('piso')?.value,
+        boxNumero: this.getBoxNumero(this.asignacionForm.get('numeroBox')?.value),
+        doctorNombre: this.getDoctorNombre(this.asignacionForm.get('nombre')?.value)
       };
-      
+
+      // Guardar en localStorage
+      const asignacionesLS = JSON.parse(localStorage.getItem('asignaciones') || '[]');
+      asignacionesLS.push(asignacion);
+      localStorage.setItem('asignaciones', JSON.stringify(asignacionesLS));
+
+      // Lógica original (opcional: puedes dejarla para el backend)
       this.boxesService.crearAsignacion(asignacion).subscribe({
         next: (_response) => {
           this.loading = false;
           this.submitting = false;
           this.mostrarMensaje('Asignación creada correctamente', 'success');
-          
-          // Navegamos de vuelta a la lista después de 2 segundos
           setTimeout(() => {
             this.router.navigate(['/lista-asignaciones']);
           }, 2000);
         },
-        error: (error: Error) => {
+        error: (err) => {
           this.loading = false;
           this.submitting = false;
-          this.mostrarMensaje('Error al crear la asignación: ' + (error.message || 'Error desconocido'), 'danger');
-          console.error('Error:', error);
+          this.mostrarMensaje('Error al crear asignación: ' + err.message, 'danger');
         }
       });
     } else {
@@ -427,8 +447,11 @@ export class CrearAsignacionComponent implements OnInit {
   }
 
   getDoctorNombre(rut: string): string {
-    if (!rut || !this.doctores || this.doctores.length === 0) return 'No disponible';
-    const doctor = this.doctores.find(d => d.rut === rut);
+    if (!rut) return 'No disponible';
+    let doctor = this.doctoresFiltrados.find(d => d.rut === rut);
+    if (!doctor) {
+      doctor = this.doctores.find(d => d.rut === rut);
+    }
     return doctor ? doctor.nombre : 'No encontrado';
   }
 
@@ -553,11 +576,81 @@ export class CrearAsignacionComponent implements OnInit {
     if (!especialidad) return null;
     const esp = especialidad.toLowerCase();
 
-    if (esp.includes('ginecologia')) return 5;
-    if (esp.includes('traumatologia')) return 9;
-    if (esp.includes('cirugia vascular')) return 7;
-    if (esp.includes('cardiologia')) return 6;
-    // Agrega aquí más reglas según tu lógica real
+    // Piso 4
+    if (
+      esp.includes('otorrino') ||
+      esp.includes('oftalmología') ||
+      esp.includes('dermatología')
+    ) return 4;
+
+    // Piso 5
+    if (
+      esp.includes('ginecología') ||
+      esp.includes('ecografía ginecología') ||
+      esp.includes('cirugía de mamas') ||
+      esp.includes('matrona')
+    ) return 5;
+
+    // Piso 6
+    if (
+      esp.includes('pediatría') ||
+      esp.includes('vacunatorio') ||
+      esp.includes('lactancia')
+    ) return 6;
+
+    // Piso 7
+    if (
+      esp.includes('paliativo') ||
+      esp.includes('oncosalud') ||
+      esp.includes('donación de sangre')
+    ) return 7;
+
+    // Piso 8
+    if (
+      esp.includes('urología') ||
+      esp.includes('electrocardiograma') ||
+      esp.includes('curaciones') ||
+      esp.includes('electromiografía') ||
+      esp.includes('electroencefalograma') ||
+      esp.includes('cardiología') ||
+      esp.includes('respiratorio') ||
+      esp.includes('vascular') ||
+      esp.includes('ecocardiograma') ||
+      esp.includes('test de esfuerzo') ||
+      esp.includes('recuperación') ||
+      esp.includes('informe') ||
+      esp.includes('estar') ||
+      esp.includes('holter')
+    ) return 8;
+
+    // Piso 10
+    if (esp.includes('kinesiología')) return 10;
+
+    // Piso 12
+    if (
+      esp.includes('nutrición') ||
+      esp.includes('cirugía general') ||
+      esp.includes('bariátrica') ||
+      esp.includes('uroflujometría') ||
+      esp.includes('comodín') ||
+      esp.includes('nutriología')
+    ) return 12;
+
+    // Piso 13
+    if (
+      esp.includes('medicina general') ||
+      esp.includes('medicina interna') ||
+      esp.includes('especialidades variadas') ||
+      esp.includes('cardiología') ||
+      esp.includes('neurología') ||
+      esp.includes('gastroenterología') ||
+      esp.includes('broncopulmonar')
+    ) return 13;
+
+    // Reglas originales
+    if (esp.includes('traumatología')) return 9;
+    if (esp.includes('cirugía vascular')) return 7;
+
     return null;
   }
 
@@ -573,4 +666,163 @@ export class CrearAsignacionComponent implements OnInit {
     this.mostrarConfirmacionAsignacion = false;
     this.crearAsignacion();
   }
+
+  private existeConflicto(asignacionNueva: any, asignaciones: any[]): boolean {
+    return asignaciones.some(a =>
+      a.boxId === asignacionNueva.boxId &&
+      a.dia === asignacionNueva.dia &&
+      (
+        // Verifica traslape de horarios
+        (asignacionNueva.horaInicio >= a.horaInicio && asignacionNueva.horaInicio < a.horaFin) ||
+        (asignacionNueva.horaFin > a.horaInicio && asignacionNueva.horaFin <= a.horaFin) ||
+        (asignacionNueva.horaInicio <= a.horaInicio && asignacionNueva.horaFin >= a.horaFin)
+      )
+    );
+  }
 }
+
+const ESPECIALIDAD_PISO_MAP: { [key: string]: number } = {
+  // Piso 4
+  "otorrinolaringologia adulto": 4,
+  "otorrinolaringologia adulto / infantil": 4,
+  "oftalmologia  adulto e infantil": 4,
+  "dermatología": 4,
+  "tm otorrino": 4,
+
+  // Piso 5
+  "ginecologia general y climaterio y menopausia": 5,
+  "ginecologia general y ginecologia reproductiva e infertilidad": 5,
+  "ginecologia general y ginecologia reproductiva e infertilidad y endometrio": 5,
+  "ginecologia general y oncologica": 5,
+  "ginecologia materno fetal": 5,
+  "ginecologia oncologica": 5,
+  "ginecologia y endometriosis": 5,
+  "ginecologia y obstetricia": 5,
+  "ecografía ginecología": 5,
+  "cirugia de mamas": 5,
+  "matrona": 5,
+  "atencion consulta matrona": 5,
+  "examen ginecológico (pap / otros)": 5,
+
+  // Piso 6
+  "pediatría": 6,
+  "vacunatorio": 6,
+  "lactancia": 6,
+  "neonatologia": 6,
+
+  // Piso 7
+  "cuidados paliativos": 7,
+  "oncosalud": 7,
+  "donación de sangre": 7,
+  "cirugia vascular": 7,
+  "manejo del dolor no oncologico": 7,
+  "oncologia cuidados paliativos adulto": 7,
+  "oncologia medica adulto": 7,
+
+  // Piso 8
+  "urologia adulto": 8,
+  "electrocardiograma (ecg) de reposo": 8,
+  "curaciones varias": 8,
+  "electromiografía": 8,
+  "electroencefalograma": 8,
+  "cardiologia adulto": 8,
+  "cardiologia arritmia": 8,
+  "cardiologia infantil": 8,
+  "respiratorio": 8,
+  "vascular": 8,
+  "ecocardiograma": 8,
+  "test de esfuerzo": 8,
+  "recuperación": 8,
+  "informe": 8,
+  "estar": 8,
+  "holter": 8,
+  "examen de sangre / orina / otros adulto": 8,
+  "examen de sangre / orina / otros infantil": 8,
+  "examen pcr covid asintomático (sin orden médica) // tes de antigeno covid-19": 8,
+  "examen pcr covid sintomático (con orden médica)  // tes de antigeno covid-19": 8,
+  "examen y pcr preoperatorio": 8,
+  "insuficiencia cardiaca": 8,
+  "inyecciones": 8,
+  "kn. respiratorio": 8,
+  "tens vascular": 8,
+
+  // Piso 9
+  "traumatologia adulto": 9,
+  "traumatologia adulto y de cadera": 9,
+  "traumatologia adulto y de hombro": 9,
+  "traumatologia adulto y de rodilla": 9,
+  "traumatologia adulto y deportivo adulto": 9,
+  "traumatologia adulto y tobillo y pie": 9,
+  "traumatologia de cadera y rodiila": 9,
+  "traumatologia de columna": 9,
+  "traumatologia de hombro": 9,
+  "traumatologia de mano": 9,
+  "traumatologia de rodilla": 9,
+  "traumatologia de tobillo y pie": 9,
+  "traumatologia y ortopedia infantil": 9,
+
+  // Piso 10
+  "kinesiología": 10,
+  "fisiatra adulto": 10,
+  "fisiatria adulto e infantil": 10,
+
+  // Piso 12
+  "nutricion adulto y enfermedades cronicas": 12,
+  "nutricion adulto y enfermedades cronicas y diabetes": 12,
+  "nutricion adulto y oncologica": 12,
+  "nutricion enfermedades cronicas": 12,
+  "nutricion infanto-juvenil": 12,
+  "nutricionista adulto y bariatrica": 12,
+  "nutriologia adulto": 12,
+  "nutriologia adulto y diabetologia adulto y evaluacion": 12,
+  "nutriologia adulto y nutriologia bariatrica": 12,
+  "cirugia general adulto": 12,
+  "cirugia general adulto y bariatrico": 12,
+  "cirugia general adulto y cabeza y cuello": 12,
+  "cirugia general adulto y coloproctologia": 12,
+  "cirugia general adulto y diagnostico endoscopia": 12,
+  "cirugia general infantil": 12,
+  "cirugia general infantil  /  urologia infantil": 12,
+  "comodín": 12,
+  "bariátrica": 12,
+  "uroflujometría": 12,
+  "bioimpedanciometria": 12,
+  "cirugia bariatrica": 12,
+  "cirugia bariatrica y control post op": 12,
+  "cirugia bariatrica y digestiva y control post op": 12,
+  "cirugia bariatrica y pared abdominal": 12,
+  "evaluacion pre-quirurgica de enfermeria": 12,
+
+  // Piso 13
+  "medicina general adulto": 13,
+  "medicina general infantil": 13,
+  "medicina interna": 13,
+  "medicina interna y medicina gral ad": 13,
+  "especialidades variadas": 13,
+  "neurologia adulto": 13,
+  "neurologia infantil": 13,
+  "gastroenterologia adulto": 13,
+  "broncopulmonar adulto": 13,
+  "broncopulmonar infantil": 13,
+  "anestesiologia": 13,
+  "anticoagulacion oral": 13,
+  "cirugia cardiaca": 13,
+  "cirugia maxilo facial": 13,
+  "endocrinologia adulto": 13,
+  "fonoaudiologia ( reabilitacion implante coclear )": 13,
+  "hematologia adulto": 13,
+  "hematologia infantil": 13,
+  "nefrologia adulto": 13,
+  "nefrologia infantil": 13,
+  "neurocirugia adulto": 13,
+  "neurocirugia adulto y neurocirugia de columna": 13,
+  "neurocirugia adulto y neurocirugia de columna y post operatorio": 13,
+  "psicologia adulto": 13,
+  "psicologia adulto y bariatrica": 13,
+  "psicologia adulto y psicologia oncologica": 13,
+  "psicologia infantil y psicologia oncologica": 13,
+  "psicologia infanto-juvenil": 13,
+  "psicologia infanto-juvenil y oncologia infantil": 13,
+  "reumatologia": 13
+  // ...agrega más según tu lógica
+};

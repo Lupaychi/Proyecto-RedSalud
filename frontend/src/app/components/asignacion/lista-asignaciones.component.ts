@@ -111,38 +111,21 @@ export class ListaAsignacionesComponent implements OnInit {
   
   cargarDatos(): void {
     this.loading = true;
-    
     this.boxesService.obtenerAsignaciones().subscribe({
-      next: (data) => {
-        this.asignaciones = data;
-        this.asignacionesFiltradas = data;
+      next: (asignacionesBackend) => {
+        const asignacionesLS = JSON.parse(localStorage.getItem('asignaciones') || '[]');
+        // Opcional: evitar duplicados por id
+        const ids = new Set(asignacionesBackend.map((a: any) => a.id));
+        const soloLocales = asignacionesLS.filter((a: any) => !ids.has(a.id));
+        this.asignaciones = [...asignacionesBackend, ...soloLocales];
+        this.asignacionesFiltradas = this.asignaciones;
         this.loading = false;
-        
-        // Extraer valores únicos para los filtros
-        this.pisos = [...new Set(data.map(a => a.piso))].sort((a, b) => a - b);
-        this.especialidades = [...new Set(data.map(a => a.especialidad))].filter(Boolean).sort();
-        this.horarios = [...new Set(data.map(a => a.horaInicio))].filter(Boolean).sort();
-        this.doctores = [...new Set(data.map(a => a.doctorNombre))].filter(Boolean).sort();
-        
-        // Si no hay especialidades extraídas de asignaciones, usar respaldo
-        if (this.especialidades.length === 0) {
-          console.warn('No se encontraron especialidades en las asignaciones, usando datos de respaldo');
-          this.especialidades = [...this.especializacionesRespaldo];
-        }
-        
-        // Agrupar especialidades
-        this.agruparEspecialidades();
-        
-        // Aplicar ordenamiento inicial
-        this.ordenarPor('piso');
       },
-      error: (err) => {
-        this.error = 'Error al cargar asignaciones: ' + err.message;
+      error: () => {
+        const asignacionesLS = JSON.parse(localStorage.getItem('asignaciones') || '[]');
+        this.asignaciones = asignacionesLS;
+        this.asignacionesFiltradas = asignacionesLS;
         this.loading = false;
-        
-        // En caso de error, usar especialidades de respaldo
-        this.especialidades = [...this.especializacionesRespaldo];
-        this.agruparEspecialidades();
       }
     });
   }
@@ -186,18 +169,18 @@ export class ListaAsignacionesComponent implements OnInit {
   eliminarAsignacion(id: string): void {
     if (confirm('¿Está seguro que desea eliminar esta asignación?')) {
       this.loading = true;
-      
+
       this.boxesService.eliminarAsignacion(id).subscribe({
         next: () => {
           this.asignaciones = this.asignaciones.filter(a => a.id !== id);
           this.asignacionesFiltradas = this.asignacionesFiltradas.filter(a => a.id !== id);
+          // Eliminar también del localStorage
+          const asignacionesLS = JSON.parse(localStorage.getItem('asignaciones') || '[]');
+          const nuevasAsignacionesLS = asignacionesLS.filter((a: any) => a.id !== id);
+          localStorage.setItem('asignaciones', JSON.stringify(nuevasAsignacionesLS));
           this.loading = false;
           this.exito = 'Asignación eliminada correctamente';
-          
-          // Ocultar mensaje de éxito después de 3 segundos
-          setTimeout(() => {
-            this.exito = '';
-          }, 3000);
+          setTimeout(() => { this.exito = ''; }, 3000);
         },
         error: (err) => {
           this.error = 'Error al eliminar asignación: ' + err.message;
