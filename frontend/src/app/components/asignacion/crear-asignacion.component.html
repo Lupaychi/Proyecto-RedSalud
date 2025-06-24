@@ -129,7 +129,7 @@
                   
                   <div class="mb-3">
                     <label for="numeroBox" class="form-label">Número de Box</label>
-                    <select id="numeroBox" formControlName="numeroBox" class="form-select" [disabled]="!asignacionForm.get('piso')?.value">
+                    <select id="numeroBox" formControlName="numeroBox" class="form-select">
                       <option value="" disabled selected>Seleccione un box</option>
                       <option *ngFor="let box of boxesFiltrados" [value]="box.id">{{ box.numero }}</option>
                     </select>
@@ -172,14 +172,22 @@
                   </div>
                   
                   <div class="mb-3">
-                    <label for="horario" class="form-label">Hora de inicio</label>
-                    <select id="horario" formControlName="horario" class="form-select">
-                      <option value="" disabled selected>Seleccione un horario</option>
-                      <option *ngFor="let hora of horariosDisponibles" [value]="hora">{{ hora }}</option>
+                    <label for="horario" class="form-label">Horario de inicio</label>
+                    <select id="horario"
+                            formControlName="horario"
+                            class="form-select"
+                            [disabled]="!asignacionForm.get('piso')?.value || !asignacionForm.get('dia')?.value"
+                            [ngClass]="{'blurred-select': !asignacionForm.get('piso')?.value || !asignacionForm.get('dia')?.value}">
+                      <option value="" disabled selected>
+                        {{ !asignacionForm.get('piso')?.value || !asignacionForm.get('dia')?.value ? 'Seleccione piso y día primero' : 'Seleccione un horario' }}
+                      </option>
+                      <option *ngFor="let hora of horariosDisponibles"
+                              [value]="hora"
+                              [ngClass]="{'text-danger fw-bold': horariosOcupados.includes(hora)}"
+                              [disabled]="horariosOcupados.includes(hora)">
+                        {{ hora }} <span *ngIf="horariosOcupados.includes(hora)"> (Ocupado)</span>
+                      </option>
                     </select>
-                    <div *ngIf="asignacionForm.get('horario')?.invalid && asignacionForm.get('horario')?.touched" class="invalid-feedback">
-                      Debe seleccionar un horario
-                    </div>
                   </div>
                 </div>
               </div>
@@ -252,19 +260,21 @@
                 </thead>
                 <tbody>
                   <tr *ngFor="let horario of horariosDisponibles; let i = index">
-                    <td class="text-center fw-bold">{{ horario }}</td>
-                    <td *ngFor="let dia of diasSemana; let j = index" 
+                    <th scope="row">{{ horario }}</th>
+                    <td *ngFor="let dia of diasSemana; let j = index"
                         [ngClass]="{
-                          'ocupado': esCeldaOcupada(j, i),
-                          'disponible': !esCeldaOcupada(j, i),
-                          'seleccionado': asignacionForm.get('dia')?.value === dia.toLowerCase() && asignacionForm.get('horario')?.value === horario
+                          'ocupado': esOcupado(j, i),
+                          'disponible': !esOcupado(j, i),
+                          'seleccionado': esSeleccionado(j, i)
                         }"
                         (click)="seleccionarCelda(j, i)">
-                      <div class="celda-contenido">
-                        <i *ngIf="esCeldaOcupada(j, i)" class="bi bi-x-circle-fill text-danger"></i>
-                        <i *ngIf="!esCeldaOcupada(j, i)" class="bi bi-check-circle-fill text-success"></i>
-                        <i *ngIf="asignacionForm.get('dia')?.value === dia.toLowerCase() && asignacionForm.get('horario')?.value === horario" class="bi bi-cursor-fill text-primary position-absolute top-50 start-50 translate-middle"></i>
-                      </div>
+                      <!-- Puedes poner aquí un ícono o texto para indicar el estado -->
+                      <ng-container *ngIf="esOcupado(j, i); else disponible">
+                        <i class="bi bi-x-circle-fill text-danger"></i>
+                      </ng-container>
+                      <ng-template #disponible>
+                        <i *ngIf="esSeleccionado(j, i)" class="bi bi-check-circle-fill text-primary"></i>
+                      </ng-template>
                     </td>
                   </tr>
                 </tbody>
@@ -405,6 +415,51 @@
           </tr>
         </tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de advertencia -->
+<div *ngIf="mostrarModalAdvertencia" class="modal-backdrop show" style="z-index: 1050;"></div>
+<div *ngIf="mostrarModalAdvertencia" class="modal d-block" tabindex="-1" style="z-index: 1060;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-danger">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          Conflicto de horario
+        </h5>
+      </div>
+      <div class="modal-body">
+        <p>{{ mensajeAdvertencia }}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" (click)="cerrarAdvertencia()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Popup de confirmación de asignación y horario -->
+<div *ngIf="mostrarConfirmacionAsignacion && confirmarHorario" class="modal-backdrop show" style="z-index: 1050;">
+  <div class="modal d-block" tabindex="-1" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirmar selección de horario</h5>
+        </div>
+        <div class="modal-body">
+          <p>
+            ¿Desea seleccionar el horario 
+            <strong>{{ confirmarHorario.hora }}</strong> el día 
+            <strong>{{ confirmarHorario.dia | titlecase }}</strong>?
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cancelarSeleccionHorario()">Cancelar</button>
+          <button type="button" class="btn btn-primary" (click)="confirmarSeleccionHorario()">Confirmar</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

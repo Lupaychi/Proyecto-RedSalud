@@ -183,12 +183,21 @@ export class ListaAsignacionesComponent implements OnInit {
 
   confirmarEliminarAsignacion() {
     if (!this.asignacionAEliminar) return;
-    // Aquí va tu lógica de eliminación (puedes llamar a tu servicio)
-    // Por ejemplo:
-    // this.boxesService.eliminarAsignacion(this.asignacionAEliminar.id).subscribe(...)
-    // Y luego actualizas las listas y cierras el modal
+
+    // 1. Obtener todas las asignaciones del localStorage
+    let asignacionesLS = JSON.parse(localStorage.getItem('asignaciones') || '[]');
+
+    // 2. Filtrar fuera la asignación a eliminar por id
+    asignacionesLS = asignacionesLS.filter((a: any) => a.id !== this.asignacionAEliminar!.id);
+
+    // 3. Guardar el array actualizado en localStorage
+    localStorage.setItem('asignaciones', JSON.stringify(asignacionesLS));
+
+    // 4. Actualizar las listas en memoria
     this.asignaciones = this.asignaciones.filter(a => a.id !== this.asignacionAEliminar!.id);
     this.asignacionesFiltradas = this.asignacionesFiltradas.filter(a => a.id !== this.asignacionAEliminar!.id);
+
+    // 5. Cerrar el modal
     this.cerrarModalEliminar();
   }
   

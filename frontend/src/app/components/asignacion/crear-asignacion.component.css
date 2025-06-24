@@ -117,6 +117,13 @@
   }
 }
 
+/* Para celdas ocupadas en la tabla de horarios */
+.horario-ocupado {
+  background: #ffe5e5 !important;
+  color: #d32f2f !important;
+  font-weight: bold;
+}
+
 /* Estilos para el formulario */
 .form-container {
   padding: 10px 0;
@@ -259,4 +266,30 @@
 select[disabled] {
   background-color: #e9ecef;
   opacity: 1;
+}
+
+.blurred-select {
+  filter: blur(2px);
+  pointer-events: none;
+  background: #f8f9fa;
+  color: #aaa;
+}
+
+.ocupado {
+  background: #ffe5e5 !important;
+}
+.disponible {
+  background: #e8f5e9 !important;
+}
+.seleccionado {
+  box-shadow: 0 0 0 2px #1976d2 inset;
+  position: relative;
+}
+.celda-contenido {
+  min-height: 32px;
+  min-width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
