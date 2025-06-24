@@ -109,8 +109,27 @@ export class ListaAsignacionesComponent implements OnInit {
   
   constructor(private boxesService: BoxesService) { }
   
+  // Puedes ejecutar esto una vez en ngOnInit para corregir los datos antiguos
   ngOnInit(): void {
     this.cargarDatos();
+    this.corrigeBoxNumero();
+  }
+
+  corrigeBoxNumero() {
+    let asignacionesLS = JSON.parse(localStorage.getItem('asignaciones') || '[]');
+    let cambiado = false;
+    asignacionesLS.forEach((a: any) => {
+      // Si boxNumero es tipo string y tiene "_", lo corregimos
+      if (typeof a.boxNumero === 'string' && a.boxNumero.includes('_')) {
+        const [piso, num] = a.boxNumero.split('_');
+        a.boxNumero = `${piso}${num.padStart(2, '0')}`; // Ej: "4_2" -> "402"
+        cambiado = true;
+      }
+    });
+    if (cambiado) {
+      localStorage.setItem('asignaciones', JSON.stringify(asignacionesLS));
+      this.cargarDatos();
+    }
   }
   
   cargarDatos(): void {

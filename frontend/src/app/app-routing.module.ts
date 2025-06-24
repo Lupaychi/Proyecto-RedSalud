@@ -19,6 +19,10 @@ const routes: Routes = [
   { path: 'medicos', component: MedicoListadoComponent },
   { path: 'medico/:rut', component: MedicoDetalleComponent },
   { path: 'modificar-asignacion/:id', component: EditAsignacionComponent },
+  {
+    path: 'tutorial',
+    loadComponent: () => import('./components/tutorial/tutorial.component').then(m => m.TutorialComponent)
+  },
   { path: '**', redirectTo: '' }
 ];
 

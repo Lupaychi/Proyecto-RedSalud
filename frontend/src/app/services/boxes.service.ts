@@ -180,4 +180,22 @@ export class BoxesService {
       })
     );
   }
+
+  editarBox(id: string, box: Partial<Box>): Observable<Box | undefined> {
+    const idx = this.boxes.findIndex(b => b.id === id);
+    if (idx !== -1) {
+      this.boxes[idx] = { ...this.boxes[idx], ...box };
+      return of(this.boxes[idx]);
+    }
+    return of(undefined);
+  }
+
+  eliminarBox(id: string): Observable<{ success: boolean }> {
+    const idx = this.boxes.findIndex(b => b.id === id);
+    if (idx !== -1) {
+      this.boxes.splice(idx, 1);
+      return of({ success: true });
+    }
+    return of({ success: false });
+  }
 }

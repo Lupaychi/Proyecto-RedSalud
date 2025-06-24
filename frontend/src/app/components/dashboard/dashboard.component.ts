@@ -62,11 +62,13 @@ import { RouterModule } from '@angular/router';
         <div class="col-md-6 mb-4">
           <div class="card">
             <div class="card-header bg-secondary text-white">
-              <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Reportes</h5>
+              <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>¿Como usar la app?</h5>
             </div>
             <div class="card-body">
               <p class="card-text">Visualiza estadísticas y reportes de ocupación de boxes y médicos.</p>
-              <button class="btn btn-outline-secondary" disabled>Próximamente</button>
+              <a routerLink="/tutorial" class="btn btn-outline-secondary">
+                <i class="bi bi-book me-1"></i> Ver tutorial
+              </a>
             </div>
           </div>
         </div>

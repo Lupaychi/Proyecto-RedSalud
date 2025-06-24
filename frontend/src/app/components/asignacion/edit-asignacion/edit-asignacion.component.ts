@@ -89,6 +89,7 @@ export class EditAsignacionComponent implements OnInit {
     if (asignacion) {
       this.asignacionForm.patchValue({
         nombre: asignacion.doctorRut,
+        especialidad: asignacion.especialidad, // <-- AGREGA ESTA LÍNEA
         piso: asignacion.piso,
         numeroBox: asignacion.boxId || asignacion.numeroBox,
         tipoBox: asignacion.tipoBox,

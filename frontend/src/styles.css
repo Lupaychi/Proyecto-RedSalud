@@ -1,32 +1,141 @@
 /* You can add global styles to this file, and also import other style files */
 
-/* Paleta de colores RedSalud */
+/* Paleta de colores RedSalud actualizada */
 :root {
-  --primary: #0073b7;
-  --primary-dark: #005a8e;
-  --primary-light: #e6f3fa;
-  --accent: #ff8c00;
-  --success: #28a745;
-  --danger: #dc3545;
-  --warning: #ffc107;
-  --info: #17a2b8;
-  --text-dark: #333333;
-  --text-gray: #6c757d;
-  --light-gray: #f8f9fa;
-  --border-color: #dee2e6;
+  --primary: #00B5B8;         /* Turquesa / Aqua */
+  --primary-dark: #00A0A3;    /* Variante más oscura del turquesa */
+  --primary-light: #A8C800;   /* Verde lima suave */
+  --accent: #A8C800;          /* Verde lima suave */
+  --success: #A8C800;         /* Verde lima suave */
+  --danger: #dc3545;          /* Puedes ajustar si quieres un rojo corporativo */
+  --warning: #ffc107;         /* Puedes ajustar si quieres un amarillo corporativo */
+  --info: #00B5B8;            /* Turquesa para info */
+  --text-dark: #333333;       /* Gris antracita */
+  --text-gray: #333333;       /* Gris antracita para textos secundarios */
+  --light-gray: #F0F0F0;      /* Gris claro para fondos */
+  --border-color: #F0F0F0;    /* Gris claro para bordes */
   --white: #ffffff;
-  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+html {
+  font-size: 80%;
 }
 
 body {
   font-family: 'Nunito', 'Segoe UI', Roboto, Arial, sans-serif;
-  background-color: #f5f8fa;
+  background-color: var(--light-gray);
   color: var(--text-dark);
+}
+
+/* Header claro y menú elegante estilo RedSalud */
+.navbar {
+  background: #fff !important;
+  color: #4d4d4d;
+  box-shadow: none;
+  border-bottom: 1px solid #e6e6e6;
+  min-height: 72px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.navbar .container-fluid {
+  align-items: center;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem 0 0.5rem;
+}
+
+.navbar-brand img {
+  height: 48px;
+  margin-right: 12px;
+  margin-left: 2px;
+  filter: none;
+  opacity: 1;
+}
+
+.navbar-nav {
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nav-link,
+.navbar .dropdown-toggle {
+  color: #4d4d4d !important;
+  font-family: 'Nunito', 'Segoe UI', Roboto, Arial, sans-serif;
+  font-weight: 400;
+  font-size: 1.18rem;
+  letter-spacing: 0.01em;
+  padding: 0 1.2rem;
+  line-height: 72px;
+  background: none !important;
+  border: none !important;
+  transition: color 0.2s;
+}
+
+.nav-link.active,
+.nav-link:focus,
+.nav-link:hover,
+.navbar .dropdown-toggle:focus,
+.navbar .dropdown-toggle:hover {
+  color: #00b5b8 !important; /* Turquesa RedSalud */
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+.dropdown-menu {
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  min-width: 180px;
+  font-size: 1.08rem;
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+
+.dropdown-item {
+  color: #4d4d4d;
+  font-weight: 400;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.dropdown-item.active,
+.dropdown-item:focus,
+.dropdown-item:hover {
+  color: #fff !important;
+  background-color: #00b5b8 !important;
+}
+
+.navbar-toggler {
+  border: none;
+  outline: none;
+}
+
+.navbar-toggler:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+@media (max-width: 991px) {
+  .navbar-nav .nav-link,
+  .navbar-nav .dropdown-toggle {
+    padding: 0.7rem 1rem;
+    line-height: 1.5;
+  }
+  .navbar-brand img {
+    height: 40px;
+  }
 }
 
 .btn-primary {
   background-color: var(--primary);
   border-color: var(--primary);
+  color: #fff;
 }
 
 .btn-primary:hover {
@@ -37,10 +146,35 @@ body {
 .btn-success {
   background-color: var(--success);
   border-color: var(--success);
+  color: #fff;
 }
 
 .bg-primary {
   background-color: var(--primary) !important;
 }
 
-/* Añadir tipografía Google Font (necesita el link en index.html) */
+.bg-light {
+  background-color: var(--light-gray) !important;
+}
+
+.text-primary {
+  color: var(--primary) !important;
+}
+
+.text-success {
+  color: var(--success) !important;
+}
+
+.text-dark {
+  color: var(--text-dark) !important;
+}
+
+.text-gray {
+  color: var(--text-gray) !important;
+}
+
+.border {
+  border-color: var(--border-color) !important;
+}
+
+/* Otros estilos globales pueden ir aquí */
