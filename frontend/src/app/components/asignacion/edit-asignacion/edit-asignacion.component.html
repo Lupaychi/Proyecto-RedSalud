@@ -1,79 +1,62 @@
 <div class="asignacion-container">
-  <div class="card shadow-sm">
-    <div class="card-header bg-primary text-white">
-      <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Editar asignación</h5>
+  <div class="card shadow">
+    <div class="card-header bg-primary text-white d-flex align-items-center">
+      <i class="bi bi-pencil-square me-2"></i>
+      <span class="fs-5">Editar asignación</span>
     </div>
     <div class="card-body">
       <form [formGroup]="asignacionForm" (ngSubmit)="actualizarAsignacion()">
-        <div class="row">
-          <div class="col-md-6">
+        <div class="row g-4">
+          <div class="col-md-5">
             <div class="mb-3">
               <label for="nombre" class="form-label">Médico</label>
-              <input id="nombre" formControlName="nombre" class="form-control" placeholder="RUT del médico" />
+              <input id="nombre" formControlName="nombre" class="form-control" placeholder="RUT o nombre" />
             </div>
             <div class="mb-3">
-              <label for="especialidad" class="form-label">Especialidad</label>
-              <input id="especialidad" formControlName="especialidad" class="form-control" placeholder="Especialidad" />
-            </div>
-            <div class="mb-3">
-              <!-- Cambia el input por un select si tienes lista de pisos -->
               <label for="piso" class="form-label">Piso</label>
               <select id="piso" formControlName="piso" class="form-select">
-                <option value="" disabled selected>Seleccione un piso</option>
+                <option value="" disabled>Seleccione un piso</option>
                 <option *ngFor="let piso of pisos" [value]="piso">{{ piso }}</option>
               </select>
             </div>
             <div class="mb-3">
               <label for="numeroBox" class="form-label">Número de Box</label>
               <select id="numeroBox" formControlName="numeroBox" class="form-select">
-                <option value="" disabled selected>Seleccione un box</option>
+                <option value="" disabled>Seleccione un box</option>
                 <option *ngFor="let box of boxesFiltrados" [value]="box.id">{{ box.numero }}</option>
               </select>
             </div>
-          </div>
-          <div class="col-md-6">
             <div class="mb-3">
               <label for="tipoBox" class="form-label">Tipo de Box</label>
-              <input id="tipoBox" formControlName="tipoBox" class="form-control" placeholder="Tipo de Box" />
-            </div>
-            <div class="mb-3">
-              <label for="dia" class="form-label">Día</label>
-              <input id="dia" formControlName="dia" class="form-control" placeholder="Día" />
-            </div>
-            <div class="mb-3">
-              <label for="horario" class="form-label">Horario de inicio</label>
-              <select id="horario" formControlName="horario" class="form-select">
-                <option value="" disabled selected>Seleccione un horario</option>
-                <option *ngFor="let hora of horariosDisponibles; let i = index"
-                        [value]="hora"
-                        [disabled]="horariosOcupados.includes(hora) || horariosOcupados.includes(horariosDisponibles[i+1])">
-                  {{ hora }}
-                  <span *ngIf="horariosOcupados.includes(hora) || horariosOcupados.includes(horariosDisponibles[i+1])"> (Ocupado)</span>
-                </option>
+              <select id="tipoBox" formControlName="tipoBox" class="form-select">
+                <option value="Consulta">Consulta</option>
+                <option value="Procedimiento">Procedimiento</option>
               </select>
             </div>
           </div>
         </div>
-        <div class="mb-3">
-          <label class="form-label">Seleccione horario semanal</label>
+
+        <!-- Horario semanal debajo, ocupa todo el ancho -->
+        <div class="mt-4">
+          <label class="form-label">Horario semanal</label>
           <div class="table-responsive">
-            <table class="table table-bordered horario-table shadow-sm">
-              <thead class="table-light">
+            <table class="table table-bordered horario-table">
+              <thead>
                 <tr>
-                  <th>Hora</th>
-                  <th *ngFor="let dia of diasSemana">{{ dia }}</th>
+                  <th class="horario-th">Hora</th>
+                  <th *ngFor="let dia of diasSemana" class="horario-th">{{ dia }}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let horario of horariosDisponibles; let i = index">
-                  <th scope="row" class="text-center fw-bold">{{ horario }}</th>
+                  <th class="horario-th text-center">{{ horario }}</th>
                   <td *ngFor="let dia of diasSemana; let j = index"
                       [ngClass]="{
                         'ocupado': esOcupado(j, i),
                         'seleccionado': esSeleccionado(j, i)
                       }"
                       (click)="seleccionarCelda(j, i)">
-                    <div class="celda-contenido position-relative">
+                    <div class="celda-contenido">
                       <ng-container *ngIf="esOcupado(j, i); else disponible">
                         <i class="bi bi-x-circle-fill text-danger"></i>
                       </ng-container>
@@ -86,15 +69,19 @@
               </tbody>
             </table>
           </div>
+          <div class="text-muted small mt-2">
+            <i class="bi bi-info-circle"></i> Seleccione un bloque de horario haciendo click en la tabla.
+          </div>
         </div>
-        <div class="d-flex justify-content-end mt-4">
-          <button type="button" class="btn btn-secondary me-2" (click)="router.navigate(['/lista-asignaciones'])">
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button type="button" class="btn btn-secondary" (click)="router.navigate(['/lista-asignaciones'])">
             <i class="bi bi-arrow-left"></i> Cancelar
           </button>
           <button type="submit" class="btn btn-primary">
             <i class="bi bi-save"></i> Actualizar asignación
-            </button>
-            </div>
+          </button>
+        </div>
       </form>
     </div>
   </div>

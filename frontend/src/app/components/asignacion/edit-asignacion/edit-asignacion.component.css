@@ -1,15 +1,19 @@
 .asignacion-container {
-  max-width: 800px;
+  max-width: 1200px; /* antes 950px */
   margin: 40px auto;
+  padding: 0 10px;
 }
 
 .card {
-  border-radius: 12px;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
 }
 
 .card-header {
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+  font-weight: 600;
+  font-size: 1.15rem;
 }
 
 .btn-primary, .btn-secondary {
@@ -18,4 +22,89 @@
 
 .form-label {
   font-weight: 500;
+}
+
+.horario-table {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  width: 100%;
+  min-width: 900px;
+  margin: 0 auto;
+}
+
+.horario-table th, .horario-table td {
+  border: 1px solid #e3e6ea !important;
+  text-align: center;
+  vertical-align: middle;
+  min-width: 90px;
+  height: 48px;
+  background: #fcfcfd;
+}
+
+.horario-table th.horario-th {
+  background: #f5faff;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.horario-table td.seleccionado {
+  background-color: #bbdefb !important;
+  border: 2px solid #1976d2 !important;
+}
+
+.horario-table td.ocupado {
+  background-color: #f8d7da !important;
+  color: #b71c1c;
+  cursor: not-allowed;
+  border: 2px solid #b71c1c !important;
+}
+
+.horario-table td:hover:not(.ocupado):not(.seleccionado) {
+  background: #e3f2fd;
+}
+
+.celda-contenido {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  min-height: 24px;
+}
+
+.mt-4 .table-responsive {
+  width: 100%;
+  min-width: 900px;
+  margin: 0 auto;
+}
+
+@media (max-width: 1100px) {
+  .mt-4 .table-responsive,
+  .horario-table {
+    min-width: 600px;
+  }
+}
+
+@media (max-width: 900px) {
+  .asignacion-container {
+    max-width: 100%;
+    margin: 10px;
+    padding: 0;
+  }
+  .card {
+    border-radius: 8px;
+  }
+  .card-header {
+    border-radius: 8px 8px 0 0;
+    font-size: 1rem;
+  }
+  .horario-th, .horario-table td, .horario-table th {
+    min-width: 45px;
+    font-size: 0.93rem;
+    height: 32px;
+  }
 }

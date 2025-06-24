@@ -305,4 +305,12 @@ export class ListaAsignacionesComponent implements OnInit {
       .map(([categoria, items]) => ({ categoria, items: items.sort() }))
       .sort((a, b) => a.categoria.localeCompare(b.categoria));
   }
+  
+  sumarMinutos(hora: string, minutos: number): string {
+    const [h, m] = hora.split(':').map(Number);
+    const date = new Date(0, 0, 0, h, m + minutos);
+    const hh = date.getHours().toString().padStart(2, '0');
+    const mm = date.getMinutes().toString().padStart(2, '0');
+    return `${hh}:${mm}`;
+  }
 }

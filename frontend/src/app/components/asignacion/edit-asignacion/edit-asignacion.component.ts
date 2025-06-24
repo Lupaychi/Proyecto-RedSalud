@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { BoxesService, Box } from '../../../services/boxes.service'; // importa el servicio
 
 @Component({
   selector: 'app-edit-asignacion',
@@ -23,15 +24,17 @@ export class EditAsignacionComponent implements OnInit {
   ];
 
   diasSemana: string[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-  pisos: number[] = [4, 5, 6, 7, 8, 9, 10, 12, 13]; // O la lista que corresponda
-  boxes: { id: string, numero: string, piso: number }[] = []; // Llénalo según tu fuente
-  boxesFiltrados: { id: string, numero: string, piso: number }[] = [];
-  horariosOcupados: string[] = [];
+  pisos: number[] = [];
+  boxesFiltrados: Box[] = [];
+  boxes: Box[] = [];
+  horariosOcupados: { dia: string, horario: string }[] = [];
+
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
-    public router: Router // <-- cambia a public
+    public router: Router,
+    private boxesService: BoxesService // inyecta el servicio
   ) {}
 
   ngOnInit(): void {
@@ -46,6 +49,12 @@ export class EditAsignacionComponent implements OnInit {
       horario: ['', Validators.required]
     });
 
+    // Cargar pisos
+    this.boxesService.obtenerPisos().subscribe(pisos => this.pisos = pisos);
+
+    // Cargar todos los boxes (opcional, si quieres tenerlos todos)
+    this.boxesService.obtenerTodosLosBoxes().subscribe(boxes => this.boxes = boxes);
+
     this.route.paramMap.subscribe(params => {
       this.asignacionId = params.get('id');
       if (this.asignacionId) {
@@ -53,8 +62,15 @@ export class EditAsignacionComponent implements OnInit {
       }
     });
 
+    // Filtrar boxes por piso cuando cambie el select
     this.asignacionForm.get('piso')?.valueChanges.subscribe(piso => {
-      this.filtrarBoxesPorPiso(piso);
+      this.boxesService.obtenerBoxesPorPiso(Number(piso)).subscribe(boxes => {
+        this.boxesFiltrados = boxes;
+        // Limpia la selección si el box ya no está disponible
+        if (!this.boxesFiltrados.some(b => b.id === this.asignacionForm.get('numeroBox')?.value)) {
+          this.asignacionForm.get('numeroBox')?.setValue('');
+        }
+      });
       this.actualizarHorariosOcupados();
     });
     this.asignacionForm.get('numeroBox')?.valueChanges.subscribe(() => this.actualizarHorariosOcupados());
@@ -63,6 +79,8 @@ export class EditAsignacionComponent implements OnInit {
     // Llama una vez al inicio
     this.filtrarBoxesPorPiso(this.asignacionForm.get('piso')?.value);
     this.actualizarHorariosOcupados();
+
+    this.boxes = JSON.parse(localStorage.getItem('boxes') || '[]');
   }
 
   cargarAsignacionParaEditar(id: string): void {
@@ -71,7 +89,6 @@ export class EditAsignacionComponent implements OnInit {
     if (asignacion) {
       this.asignacionForm.patchValue({
         nombre: asignacion.doctorRut,
-        especialidad: asignacion.especialidad,
         piso: asignacion.piso,
         numeroBox: asignacion.boxId || asignacion.numeroBox,
         tipoBox: asignacion.tipoBox,
@@ -86,15 +103,28 @@ export class EditAsignacionComponent implements OnInit {
     const asignacionesLS = JSON.parse(localStorage.getItem('asignaciones') || '[]');
     const idx = asignacionesLS.findIndex((a: any) => a.id === this.asignacionId);
     if (idx !== -1) {
+      const horaInicio = this.asignacionForm.value.horario;
+      // Calcula el índice y la hora final (dos bloques de media hora)
+      const idxHora = this.horariosDisponibles.indexOf(horaInicio);
+      let horaFin = '';
+      if (idxHora !== -1 && idxHora + 2 < this.horariosDisponibles.length) {
+        horaFin = this.horariosDisponibles[idxHora + 2];
+      } else {
+        // Si es el último bloque, suma 1 hora manualmente
+        const [h, m] = horaInicio.split(':').map(Number);
+        horaFin = (h + 1).toString().padStart(2, '0') + ':' + m.toString().padStart(2, '0');
+      }
       asignacionesLS[idx] = {
         ...asignacionesLS[idx],
         doctorRut: this.asignacionForm.value.nombre,
         especialidad: this.asignacionForm.value.especialidad,
         piso: this.asignacionForm.value.piso,
         boxId: this.asignacionForm.value.numeroBox,
+        boxNumero: this.asignacionForm.value.numeroBox,
         tipoBox: this.asignacionForm.value.tipoBox,
         dia: this.asignacionForm.value.dia,
-        horaInicio: this.asignacionForm.value.horario
+        horaInicio: horaInicio,
+        horaFin: horaFin
       };
       localStorage.setItem('asignaciones', JSON.stringify(asignacionesLS));
     }
@@ -105,30 +135,38 @@ export class EditAsignacionComponent implements OnInit {
   actualizarHorariosOcupados() {
     const piso = this.asignacionForm.get('piso')?.value;
     const numeroBox = this.asignacionForm.get('numeroBox')?.value;
-    const dia = this.asignacionForm.get('dia')?.value;
-    const idActual = this.asignacionForm.get('id')?.value; // o el id que corresponda
+    const idActual = this.asignacionId;
 
-    if (!piso || !numeroBox || !dia) {
+    if (!piso || !numeroBox) {
       this.horariosOcupados = [];
       return;
     }
 
     const asignaciones = JSON.parse(localStorage.getItem('asignaciones') || '[]');
-    this.horariosOcupados = asignaciones
+    this.horariosOcupados = [];
+    asignaciones
       .filter((a: any) =>
         a.piso == piso &&
-        a.boxNumero == numeroBox &&
-        a.dia == dia &&
-        a.id !== idActual // No bloquear el horario de la asignación que se está editando
+        (a.boxNumero == numeroBox || a.boxId == numeroBox) &&
+        a.id !== idActual
       )
-      .map((a: any) => a.horaInicio);
+      .forEach((a: any) => {
+        const idxHora = this.horariosDisponibles.indexOf(a.horaInicio);
+        if (idxHora !== -1) {
+          // Marca ocupado el bloque y el siguiente (doble selección)
+          this.horariosOcupados.push({ dia: a.dia, horario: this.horariosDisponibles[idxHora] });
+          if (idxHora + 1 < this.horariosDisponibles.length) {
+            this.horariosOcupados.push({ dia: a.dia, horario: this.horariosDisponibles[idxHora + 1] });
+          }
+        }
+      });
   }
 
   // Lógica para saber si una celda está ocupada
   esOcupado(diaIdx: number, horaIdx: number): boolean {
-    // Implementa según tu lógica de ocupación
-    // Ejemplo: return this.horariosOcupados.some(h => h.diaIdx === diaIdx && h.horaIdx === horaIdx);
-    return false;
+    const dia = this.diasSemana[diaIdx].toLowerCase();
+    const horario = this.horariosDisponibles[horaIdx];
+    return this.horariosOcupados.some(h => h.dia === dia && h.horario === horario);
   }
 
   // Lógica para saber si una celda está seleccionada
@@ -138,22 +176,26 @@ export class EditAsignacionComponent implements OnInit {
     if (!diaForm || !horaForm) return false;
     const esDia = this.diasSemana[diaIdx].toLowerCase() === diaForm;
     const idxSeleccionado = this.horariosDisponibles.indexOf(horaForm);
-    // Marca el bloque seleccionado y el siguiente (media hora)
+    // Marca el bloque seleccionado y el siguiente (doble selección)
     return esDia && (horaIdx === idxSeleccionado || horaIdx === idxSeleccionado + 1);
   }
 
   // Selección de celda
   seleccionarCelda(diaIdx: number, horaIdx: number): void {
-    if (this.esOcupado(diaIdx, horaIdx)) return;
+    // Si cualquiera de los dos bloques está ocupado, no permite seleccionar
+    if (
+      this.esOcupado(diaIdx, horaIdx) ||
+      this.esOcupado(diaIdx, horaIdx + 1)
+    ) return;
     this.asignacionForm.patchValue({
       dia: this.diasSemana[diaIdx].toLowerCase(),
       horario: this.horariosDisponibles[horaIdx]
     });
   }
 
+  // Filtra los boxes según el piso seleccionado
   filtrarBoxesPorPiso(piso: number) {
     this.boxesFiltrados = this.boxes.filter(box => box.piso == piso);
-    // Limpia la selección si el box ya no está disponible
     if (!this.boxesFiltrados.some(b => b.id === this.asignacionForm.get('numeroBox')?.value)) {
       this.asignacionForm.get('numeroBox')?.setValue('');
     }
