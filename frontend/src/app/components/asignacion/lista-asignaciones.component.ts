@@ -103,6 +103,10 @@ export class ListaAsignacionesComponent implements OnInit {
     "Traumatologia y ortopedia infantil", "Urologia adulto"
   ];
   
+  // Agrega estas propiedades:
+  mostrarModalEliminar = false;
+  asignacionAEliminar: Asignacion | null = null;
+  
   constructor(private boxesService: BoxesService) { }
   
   ngOnInit(): void {
@@ -166,28 +170,26 @@ export class ListaAsignacionesComponent implements OnInit {
     }
   }
   
-  eliminarAsignacion(id: string): void {
-    if (confirm('¿Está seguro que desea eliminar esta asignación?')) {
-      this.loading = true;
+  // Cambia la función de eliminar:
+  abrirModalEliminar(asignacion: Asignacion) {
+    this.asignacionAEliminar = asignacion;
+    this.mostrarModalEliminar = true;
+  }
 
-      this.boxesService.eliminarAsignacion(id).subscribe({
-        next: () => {
-          this.asignaciones = this.asignaciones.filter(a => a.id !== id);
-          this.asignacionesFiltradas = this.asignacionesFiltradas.filter(a => a.id !== id);
-          // Eliminar también del localStorage
-          const asignacionesLS = JSON.parse(localStorage.getItem('asignaciones') || '[]');
-          const nuevasAsignacionesLS = asignacionesLS.filter((a: any) => a.id !== id);
-          localStorage.setItem('asignaciones', JSON.stringify(nuevasAsignacionesLS));
-          this.loading = false;
-          this.exito = 'Asignación eliminada correctamente';
-          setTimeout(() => { this.exito = ''; }, 3000);
-        },
-        error: (err) => {
-          this.error = 'Error al eliminar asignación: ' + err.message;
-          this.loading = false;
-        }
-      });
-    }
+  cerrarModalEliminar() {
+    this.mostrarModalEliminar = false;
+    this.asignacionAEliminar = null;
+  }
+
+  confirmarEliminarAsignacion() {
+    if (!this.asignacionAEliminar) return;
+    // Aquí va tu lógica de eliminación (puedes llamar a tu servicio)
+    // Por ejemplo:
+    // this.boxesService.eliminarAsignacion(this.asignacionAEliminar.id).subscribe(...)
+    // Y luego actualizas las listas y cierras el modal
+    this.asignaciones = this.asignaciones.filter(a => a.id !== this.asignacionAEliminar!.id);
+    this.asignacionesFiltradas = this.asignacionesFiltradas.filter(a => a.id !== this.asignacionAEliminar!.id);
+    this.cerrarModalEliminar();
   }
   
   ordenarPor(propiedad: string): void {

@@ -1,0 +1,56 @@
+<div class="asignacion-container">
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Editar asignación</h5>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="asignacionForm" (ngSubmit)="actualizarAsignacion()">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Médico</label>
+              <input id="nombre" formControlName="nombre" class="form-control" placeholder="RUT del médico" />
+            </div>
+            <div class="mb-3">
+              <label for="especialidad" class="form-label">Especialidad</label>
+              <input id="especialidad" formControlName="especialidad" class="form-control" placeholder="Especialidad" />
+            </div>
+            <div class="mb-3">
+              <label for="piso" class="form-label">Piso</label>
+              <input id="piso" formControlName="piso" class="form-control" placeholder="Piso" type="number" min="1" />
+            </div>
+            <div class="mb-3">
+              <label for="numeroBox" class="form-label">Número de Box</label>
+              <input id="numeroBox" formControlName="numeroBox" class="form-control" placeholder="Número de Box" />
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="tipoBox" class="form-label">Tipo de Box</label>
+              <input id="tipoBox" formControlName="tipoBox" class="form-control" placeholder="Tipo de Box" />
+            </div>
+            <div class="mb-3">
+              <label for="dia" class="form-label">Día</label>
+              <input id="dia" formControlName="dia" class="form-control" placeholder="Día" />
+            </div>
+            <div class="mb-3">
+              <label for="horario" class="form-label">Horario de inicio</label>
+              <select id="horario" formControlName="horario" class="form-select">
+                <option value="" disabled selected>Seleccione un horario</option>
+                <option *ngFor="let hora of horariosDisponibles" [value]="hora">{{ hora }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex justify-content-end mt-4">
+          <button type="button" class="btn btn-secondary me-2" (click)="router.navigate(['/lista-asignaciones'])">
+            <i class="bi bi-arrow-left"></i> Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save"></i> Actualizar asignación
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

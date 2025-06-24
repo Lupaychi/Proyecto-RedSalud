@@ -118,7 +118,7 @@
                 <div class="card-body">
                   <div class="mb-3">
                     <label for="piso" class="form-label">Piso</label>
-                    <select id="piso" formControlName="piso" class="form-select" [class.is-invalid]="asignacionForm.get('piso')?.invalid && asignacionForm.get('piso')?.touched">
+                    <select id="piso" formControlName="piso" class="form-select" (change)="onPisoChange($event)">
                       <option value="" disabled selected>Seleccione un piso</option>
                       <option *ngFor="let piso of pisos" [value]="piso">{{ piso }}</option>
                     </select>
@@ -173,11 +173,9 @@
                   
                   <div class="mb-3">
                     <label for="horario" class="form-label">Hora de inicio</label>
-                    <select id="horario" formControlName="horario" class="form-select" [class.is-invalid]="asignacionForm.get('horario')?.invalid && asignacionForm.get('horario')?.touched" [disabled]="!asignacionForm.get('dia')?.value || !asignacionForm.get('numeroBox')?.value">
+                    <select id="horario" formControlName="horario" class="form-select">
                       <option value="" disabled selected>Seleccione un horario</option>
-                      <option *ngFor="let horario of horariosDisponibles; let i = index" [value]="horario" [disabled]="esCeldaOcupada(diasSemana.indexOf(asignacionForm.get('dia')?.value), i)">
-                        {{ horario }} - {{ calcularHoraFin(horario) }}
-                      </option>
+                      <option *ngFor="let hora of horariosDisponibles" [value]="hora">{{ hora }}</option>
                     </select>
                     <div *ngIf="asignacionForm.get('horario')?.invalid && asignacionForm.get('horario')?.touched" class="invalid-feedback">
                       Debe seleccionar un horario
@@ -335,6 +333,25 @@
   </div>
 </div>
 
+<!-- Modal de confirmación de eliminación -->
+<div *ngIf="mostrarModalEliminar" class="modal-backdrop show" style="z-index: 1050;"></div>
+<div *ngIf="mostrarModalEliminar" class="modal d-block" tabindex="-1" style="z-index: 1060;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">¿Eliminar asignación?</h5>
+      </div>
+      <div class="modal-body">
+        <p>¿Está seguro que desea eliminar esta asignación?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModalEliminar()">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="confirmarEliminarAsignacion()">Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="card mt-4">
   <div class="card-header bg-secondary text-white">
     <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Asignaciones filtradas</h5>
@@ -380,6 +397,10 @@
             </td>
             <td>
               <!-- Acciones -->
+              <button type="button" class="btn btn-outline-danger btn-sm"
+                      (click)="abrirModalEliminar(asignacion)">
+                <i class="bi bi-trash"></i>
+              </button>
             </td>
           </tr>
         </tbody>

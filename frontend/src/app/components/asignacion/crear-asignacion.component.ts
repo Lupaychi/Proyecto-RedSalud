@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { PersonasService } from '../../services/personas.service';
 import { BoxesService } from '../../services/boxes.service';
 
@@ -57,6 +57,14 @@ export class CrearAsignacionComponent implements OnInit {
   mostrarConfirmacionAsignacion = false;
   asignacionesFiltradas: any[] = []; // Asegúrate de tener esta propiedad
 
+  // Nueva propiedad para controlar la visualización del modal de eliminación
+  mostrarModalEliminar = false;
+  asignacionAEliminar: any = null;
+
+  // Propiedades para edición
+  editMode = false;
+  asignacionId: string | null = null;
+
   // Getter para acceder fácilmente a los controles del formulario
   get f() {
     return this.asignacionForm.controls;
@@ -66,7 +74,8 @@ export class CrearAsignacionComponent implements OnInit {
     private fb: FormBuilder, 
     private personasService: PersonasService,
     private boxesService: BoxesService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.asignacionForm = this.fb.group({
       nombre: ['', [Validators.required]],
@@ -88,6 +97,15 @@ export class CrearAsignacionComponent implements OnInit {
     this.cargarDatos();
     this.cargarAsignacionesLocales(); // <--- Agrega esta línea
     this.configurarEventosFormulario();
+
+    // Manejo de ruta para edición
+    this.route.paramMap.subscribe(params => {
+      this.asignacionId = params.get('id');
+      if (this.asignacionId) {
+        this.editMode = true;
+        this.cargarAsignacionParaEditar(this.asignacionId);
+      }
+    });
   }
 
   cargarAsignacionesLocales(): void {
@@ -337,15 +355,33 @@ export class CrearAsignacionComponent implements OnInit {
         especialidad: this.asignacionForm.get('especialidad')?.value,
         tipoBox: this.asignacionForm.get('tipoBox')?.value,
         // Agrega otros campos necesarios aquí
-        id: Date.now().toString(), // Genera un id simple
+        id: this.editMode && this.asignacionId ? this.asignacionId : Date.now().toString(), // Usa el id existente si editando
         piso: this.asignacionForm.get('piso')?.value,
         boxNumero: this.getBoxNumero(this.asignacionForm.get('numeroBox')?.value),
         doctorNombre: this.getDoctorNombre(this.asignacionForm.get('nombre')?.value)
       };
 
-      // Guardar en localStorage
-      const asignacionesLS = JSON.parse(localStorage.getItem('asignaciones') || '[]');
-      asignacionesLS.push(asignacion);
+      // Guardar en localStorage con control de conflictos y edición
+      let asignacionesLS = JSON.parse(localStorage.getItem('asignaciones') || '[]');
+
+      // Si editMode, reemplaza la asignación existente
+      if (this.editMode && this.asignacionId) {
+        const idx = asignacionesLS.findIndex((a: any) => a.id === this.asignacionId);
+        if (idx !== -1) {
+          asignacionesLS[idx] = asignacion;
+        } else {
+          asignacionesLS.push(asignacion);
+        }
+      } else {
+        // Verifica conflicto antes de agregar
+        if (this.existeConflicto(asignacion, asignacionesLS)) {
+          this.loading = false;
+          this.submitting = false;
+          this.mostrarMensaje('Ya existe una asignación para ese box, día y horario.', 'danger');
+          return;
+        }
+        asignacionesLS.push(asignacion);
+      }
       localStorage.setItem('asignaciones', JSON.stringify(asignacionesLS));
 
       // Lógica original (opcional: puedes dejarla para el backend)
@@ -667,6 +703,25 @@ export class CrearAsignacionComponent implements OnInit {
     this.crearAsignacion();
   }
 
+  // Nueva función para abrir el modal de eliminación
+  abrirModalEliminar(asignacion: any) {
+    this.asignacionAEliminar = asignacion;
+    this.mostrarModalEliminar = true;
+  }
+
+  // Función para cerrar el modal de eliminación
+  cerrarModalEliminar() {
+    this.mostrarModalEliminar = false;
+    this.asignacionAEliminar = null;
+  }
+
+  // Función para confirmar la eliminación de una asignación
+  confirmarEliminarAsignacion() {
+    // Lógica para eliminar la asignación (usa this.asignacionAEliminar)
+    // ...
+    this.cerrarModalEliminar();
+  }
+
   private existeConflicto(asignacionNueva: any, asignaciones: any[]): boolean {
     return asignaciones.some(a =>
       a.boxId === asignacionNueva.boxId &&
@@ -678,6 +733,46 @@ export class CrearAsignacionComponent implements OnInit {
         (asignacionNueva.horaInicio <= a.horaInicio && asignacionNueva.horaFin >= a.horaFin)
       )
     );
+  }
+
+  cargarAsignacionParaEditar(id: string): void {
+    // Busca la asignación por id (puede ser en localStorage o backend)
+    const asignacionesLS = JSON.parse(localStorage.getItem('asignaciones') || '[]');
+    const asignacion = asignacionesLS.find((a: any) => a.id === id);
+    if (asignacion) {
+      this.asignacionForm.patchValue({
+        // Ajusta los nombres de los campos según tu formulario
+        nombre: asignacion.doctorRut,
+        especialidad: asignacion.especialidad,
+        piso: asignacion.piso,
+        numeroBox: asignacion.boxId || asignacion.numeroBox,
+        tipoBox: asignacion.tipoBox,
+        dia: asignacion.dia,
+        horario: asignacion.horaInicio
+      });
+    }
+    // Si usas backend, haz la petición aquí
+  }
+
+  horariosPorPiso: { [piso: number]: string[] } = (() => {
+    const pisos = [4, 5, 6, 7, 8, 9, 10, 12, 13];
+    const horarios: string[] = [];
+    for (let h = 8; h < 20; h++) {
+      horarios.push(`${h.toString().padStart(2, '0')}:00`);
+      horarios.push(`${h.toString().padStart(2, '0')}:30`);
+    }
+    horarios.push('20:00');
+    const obj: { [piso: number]: string[] } = {};
+    pisos.forEach(piso => {
+      obj[piso] = [...horarios];
+    });
+    return obj;
+  })();
+  
+  onPisoChange(event: Event): void {
+    const value = Number((event.target as HTMLSelectElement).value);
+    this.horariosDisponibles = this.horariosPorPiso[value] || [];
+    this.asignacionForm.get('horario')?.setValue('');
   }
 }
 

@@ -1,0 +1,21 @@
+.asignacion-container {
+  max-width: 800px;
+  margin: 40px auto;
+}
+
+.card {
+  border-radius: 12px;
+}
+
+.card-header {
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.btn-primary, .btn-secondary {
+  min-width: 150px;
+}
+
+.form-label {
+  font-weight: 500;
+}

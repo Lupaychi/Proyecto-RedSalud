@@ -193,7 +193,7 @@
                   <a [routerLink]="['/modificar-asignacion', asignacion.id]" class="btn btn-outline-primary" title="Editar asignación">
                     <i class="bi bi-pencil"></i>
                   </a>
-                  <button class="btn btn-outline-danger" (click)="eliminarAsignacion(asignacion.id)" title="Eliminar asignación">
+                  <button class="btn btn-outline-danger" (click)="abrirModalEliminar(asignacion)" title="Eliminar asignación">
                     <i class="bi bi-trash"></i>
                   </button>
                 </div>
@@ -221,6 +221,25 @@
         <a routerLink="/crear-asignacion" class="btn btn-primary">
           <i class="bi bi-plus-circle me-1"></i> Crear asignación
         </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de confirmación de eliminación -->
+<div *ngIf="mostrarModalEliminar" class="modal-backdrop show" style="z-index: 1050;"></div>
+<div *ngIf="mostrarModalEliminar" class="modal d-block" tabindex="-1" style="z-index: 1060;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">¿Eliminar asignación?</h5>
+      </div>
+      <div class="modal-body">
+        <p>¿Está seguro que desea eliminar esta asignación?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModalEliminar()">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="confirmarEliminarAsignacion()">Eliminar</button>
       </div>
     </div>
   </div>
